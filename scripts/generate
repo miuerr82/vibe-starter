@@ -1,0 +1,233 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source "$(cd "$(dirname "$0")" && pwd)/lib/common.sh"
+
+declare -a GENERATED_SUMMARY=()
+
+FILE_KEYS=(
+  "0_project"
+  "glossary"
+  "roles"
+  "objects"
+  "behaviors"
+  "flows"
+  "boundaries"
+  "states"
+  "rules"
+  "interfaces"
+  "decisions"
+  "handoff"
+  "user_flows"
+)
+
+ALIASES=(
+  "project"
+  "terms"
+  "role"
+  "object"
+  "behavior"
+  "flow"
+  "boundary"
+  "state"
+  "rule"
+  "interface"
+  "decision"
+  "handoff_readme"
+  "steps"
+)
+
+MENU_LABELS=(
+  "專案入口"
+  "術語表"
+  "角色"
+  "物件"
+  "行為"
+  "流程"
+  "邊界"
+  "狀態"
+  "規則"
+  "介面"
+  "決策"
+  "交接說明"
+  "步驟流程"
+)
+
+canonical_mode() {
+  case "$1" in
+    1|single) print_line "single" ;;
+    2|multiple) print_line "multiple" ;;
+    3|all) print_line "all" ;;
+    *) return 1 ;;
+  esac
+}
+
+canonical_key() {
+  case "$1" in
+    1|0_project|project) print_line "0_project" ;;
+    2|glossary|terms) print_line "glossary" ;;
+    3|roles|role) print_line "roles" ;;
+    4|objects|object) print_line "objects" ;;
+    5|behaviors|behavior) print_line "behaviors" ;;
+    6|flows|flow) print_line "flows" ;;
+    7|boundaries|boundary) print_line "boundaries" ;;
+    8|states|state) print_line "states" ;;
+    9|rules|rule) print_line "rules" ;;
+    10|interfaces|interface) print_line "interfaces" ;;
+    11|decisions|decision) print_line "decisions" ;;
+    12|handoff|handoff_readme) print_line "handoff" ;;
+    13|user_flows|steps) print_line "user_flows" ;;
+    *) return 1 ;;
+  esac
+}
+
+template_path_for() {
+  case "$1" in
+    0_project) print_line "${STARTER_ROOT}/templates/vibe-coding/specs/0_project.md" ;;
+    glossary) print_line "${STARTER_ROOT}/templates/vibe-coding/specs/glossary.md" ;;
+    roles) print_line "${STARTER_ROOT}/templates/vibe-coding/specs/roles.md" ;;
+    objects) print_line "${STARTER_ROOT}/templates/vibe-coding/specs/objects.md" ;;
+    behaviors) print_line "${STARTER_ROOT}/templates/vibe-coding/specs/behaviors.md" ;;
+    flows) print_line "${STARTER_ROOT}/templates/vibe-coding/specs/flows.md" ;;
+    boundaries) print_line "${STARTER_ROOT}/templates/vibe-coding/specs/boundaries.md" ;;
+    states) print_line "${STARTER_ROOT}/templates/vibe-coding/specs/states.md" ;;
+    rules) print_line "${STARTER_ROOT}/templates/vibe-coding/specs/rules.md" ;;
+    interfaces) print_line "${STARTER_ROOT}/templates/vibe-coding/specs/interfaces.md" ;;
+    decisions) print_line "${STARTER_ROOT}/templates/vibe-coding/specs/decisions.md" ;;
+    handoff) print_line "${STARTER_ROOT}/templates/vibe-coding/handoff/README.md" ;;
+    user_flows) print_line "${STARTER_ROOT}/templates/vibe-coding/specs/user_flows.md" ;;
+    *) return 1 ;;
+  esac
+}
+
+target_path_for() {
+  case "$1" in
+    0_project) print_line "${SPECS_DIR}/0_project.md" ;;
+    glossary) print_line "${SPECS_DIR}/glossary.md" ;;
+    roles) print_line "${SPECS_DIR}/roles.md" ;;
+    objects) print_line "${SPECS_DIR}/objects.md" ;;
+    behaviors) print_line "${SPECS_DIR}/behaviors.md" ;;
+    flows) print_line "${SPECS_DIR}/flows.md" ;;
+    boundaries) print_line "${SPECS_DIR}/boundaries.md" ;;
+    states) print_line "${SPECS_DIR}/states.md" ;;
+    rules) print_line "${SPECS_DIR}/rules.md" ;;
+    interfaces) print_line "${SPECS_DIR}/interfaces.md" ;;
+    decisions) print_line "${SPECS_DIR}/decisions.md" ;;
+    handoff) print_line "${HANDOFF_DIR}/README.md" ;;
+    user_flows) print_line "${SPECS_DIR}/user_flows.md" ;;
+    *) return 1 ;;
+  esac
+}
+
+list_available_files() {
+  local i=0
+  print_line "可生成的文件如下：" >&2
+  for key in "${FILE_KEYS[@]}"; do
+    print_line "- $((i + 1)). ${key} (${MENU_LABELS[$i]})，別名：${ALIASES[$i]}" >&2
+    i=$((i + 1))
+  done
+}
+
+list_available_modes() {
+  print_line "請選擇要生成的文件：" >&2
+  print_line "- 1. 單一" >&2
+  print_line "- 2. 多個" >&2
+  print_line "- 3. 全部" >&2
+}
+
+collect_targets() {
+  local mode="${1:-}"
+  local selected=""
+  local selected_line=""
+  local selected_mode=""
+  shift || true
+
+  if [[ -n "${mode}" ]]; then
+    mode="$(canonical_mode "${mode}" 2>/dev/null || print_line "${mode}")"
+  fi
+
+  case "${mode}" in
+    all)
+      printf '%s\n' "${FILE_KEYS[@]}"
+      return 0
+      ;;
+    single)
+      if [[ $# -eq 0 ]]; then
+        list_available_files
+        read -r -p "請輸入單一文件編號（也可輸入 key / 別名）: " selected
+        printf '%s\n' "${selected}"
+      else
+        printf '%s\n' "$1"
+      fi
+      return 0
+      ;;
+    multiple)
+      if [[ $# -eq 0 ]]; then
+        list_available_files
+        read -r -p "請輸入多個文件編號，請用空白分隔（也可混用 key / 別名）: " selected_line
+        for key in ${selected_line}; do
+          printf '%s\n' "${key}"
+        done
+      else
+        printf '%s\n' "$@"
+      fi
+      return 0
+      ;;
+    "")
+      list_available_modes
+      read -r -p "請輸入模式編號 [1/2/3]: " selected_mode
+      collect_targets "${selected_mode}"
+      return 0
+      ;;
+    *)
+      fail "不支援的生成模式：${mode}"
+      ;;
+  esac
+}
+
+validate_key() {
+  canonical_key "$1" >/dev/null
+}
+
+run_generation() {
+  local requested_key="$1"
+  local key=""
+  local source_path target_path summary
+
+  validate_key "${requested_key}" || fail "不支援的文件 key / 別名 / 編號：${requested_key}"
+  key="$(canonical_key "${requested_key}")"
+  source_path="$(template_path_for "${key}")"
+  target_path="$(target_path_for "${key}")"
+
+  copy_template_with_conflict_policy "${source_path}" "${target_path}" summary
+  GENERATED_SUMMARY+=("${summary}")
+}
+
+main() {
+  local mode="${1:-}"
+  shift || true
+  local selected
+
+  ensure_project_root
+  ensure_dir "${WORKSPACE_DIR}"
+  ensure_dir "${SPECS_DIR}"
+  ensure_dir "${HANDOFF_DIR}"
+
+  while IFS= read -r selected; do
+    [[ -n "${selected}" ]] || continue
+    run_generation "${selected}"
+  done < <(collect_targets "${mode}" "$@")
+
+  print_summary "生成完成。已建立、覆寫、略過的檔案如下。" "${GENERATED_SUMMARY[@]}"
+
+  if printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'user_flows'; then
+    print_line "下一步建議：可請 AI 依 user_flows.md 協助補入 behaviors.md 與 flows.md。"
+  else
+    print_line "下一步建議：先補 0_project.md、glossary.md、roles.md。"
+  fi
+
+  print_line "目前已有可交接內容，是否要我整理 handoff？"
+}
+
+main "$@"
