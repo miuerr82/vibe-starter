@@ -1,178 +1,180 @@
 # vibe-starter
 
-這份 starter 是放在專案內 `vibe-coding/` 目錄下的小工具，用來初始化新的專案。後續開發仍以專案根目錄為主，`vibe-starter` 只負責初始化與輔助。
+`vibe-starter` 是放在產品專案內的初始化工具，用來幫新專案建立最基本的 AI 協作工作環境與 spec 文件骨架。
+
+它的定位不是產品原始碼模板，而是：
+
+- 幫專案補上根目錄 `AGENTS.md`
+- 幫專案建立 `vibe-coding/` 下的工作文件
+- 幫專案生成第一版 spec / handoff 模板
+
+後續真正的產品開發，仍然以產品專案根目錄為主。
+
+## Quick Start
+
+如果你是第一次使用，先照這 5 步做即可：
+
+```bash
+git clone <your-product-repo> /path/to/project
+cd /path/to/project
+mkdir -p vibe-coding
+cd vibe-coding
+git clone https://<your-repo>/vibe-starter
+cd /path/to/project
+bash ./vibe-coding/vibe-starter/scripts/init
+bash ./vibe-coding/vibe-starter/scripts/generate
+```
+
+做完之後，你會得到：
+
+- 根目錄 `AGENTS.md`
+- `vibe-coding/.gitignore`
+- `vibe-coding/specs/` 下的 spec 模板
+- `vibe-coding/handoff/` 下的 handoff 模板
+
+## 這個專案的用途
+
+這個 starter 主要處理兩件事：
+
+1. `init`
+   - 初始化產品專案的 AI 協作環境
+   - 建立或補齊 `AGENTS.md`
+   - 建立 `vibe-coding/.gitignore`
+
+2. `generate`
+   - 在 `vibe-coding/` 下生成 spec 與 handoff 模板
+   - 協助專案快速進入 spec-driven 工作方式
+
+目前第一版聚焦在：
+
+- 單一專案
+- 全端 web 專案優先
+- 中文文件優先
 
 ## 適用情境
 
-- 你要建立一個新的單一專案
-- 你希望用 starter 幫專案補上基礎結構
-- 你希望把工具集中放在專案內的 `vibe-coding/`
-- 你希望後續開發與 handoff 都跟著專案走
+- 你剛建立一個新的產品專案
+- 你想把 AI 協作規則與 handoff 留在產品專案內
+- 你想先生成 spec 文件骨架，再逐步補內容
+- 你不想把 starter 本身當成產品 repo 的一部分
 
-## 1. 建立並取得產品專案
+## 目錄位置
 
-先在 GitHub 建立產品專案，然後 clone 到本機。
+`vibe-starter` 預期放在產品專案內的這個位置：
 
-範例：
+```text
+<project-root>/
+├─ vibe-coding/
+│  └─ vibe-starter/
+```
+
+## 快速開始
+
+1. 建立並 clone 產品專案
 
 ```bash
 git clone <your-product-repo> /path/to/project
 cd /path/to/project
 ```
 
-## 2. 建立 `vibe-coding` 工作目錄
-
-在專案底下建立放置工具的工作目錄：
-
-範例：
+2. 建立 `vibe-coding/`
 
 ```bash
-mkdir vibe-coding
+mkdir -p vibe-coding
 cd vibe-coding
 ```
 
-## 3. 取得 `vibe-starter`
-
-在 `vibe-coding/` 底下 clone `vibe-starter`：
+3. clone `vibe-starter`
 
 ```bash
-cd /path/to/my-project
-git clone https://....../vibe-starter
-```
-
-完成後回到專案根目錄：
-
-```bash
+git clone https://<your-repo>/vibe-starter
 cd /path/to/project
 ```
 
-## 4. 執行初始化
-
-從專案根目錄執行：
+4. 執行初始化
 
 ```bash
 bash ./vibe-coding/vibe-starter/scripts/init
 ```
 
-## 5. `init` 會做什麼
-
-`init` 至少應完成以下事情：
-
-- 確認目前是在產品專案根目錄執行
-- 檢查 `vibe-coding/.gitignore` 是否存在
-- 若不存在則建立 `vibe-coding/.gitignore`
-- 若已存在則直接 append 忽略規則
-- 將 `vibe-starter` 加入 `vibe-coding/.gitignore`
-- 檢查專案根目錄是否已有 `AGENTS.md`
-- 如果沒有 `AGENTS.md`，建立一份基礎版 `AGENTS.md`
-- 將 starter 所需的初始化內容寫入該專案
-- 讓後續 vibe coding 以該專案根目錄為主要工作上下文
-- 完成後建議下一步執行 `generate`
-
-目前基礎 `AGENTS.md` 模板草案位於：
-
-- `vibe-starter/templates/AGENTS.md`
-
-## 6. `AGENTS.md` 規則
-
-- `init` 執行時，會先檢查專案根目錄是否存在 `AGENTS.md`
-- 若不存在，會建立一份基礎 `AGENTS.md`
-- 若已存在，會先詢問是否覆寫
-- 若不覆寫，可選擇提供其他檔名，或直接略過
-
-## 7. 檔案衝突處理
-
-- 若 `init` 發現根目錄 `AGENTS.md` 已存在，不會直接覆蓋
-- 會先詢問是否覆寫
-- 若不覆寫，可選擇提供其他檔名，或直接略過該檔案
-- `vibe-coding/.gitignore` 不走覆寫流程，存在時直接 append
-
-建議提示語：
-
-- `檔案已存在，是否覆寫？`
-- `若不覆寫，請選擇：提供其他檔名 / 略過`
-
-## 8. 後續工作位置
-
-- 後續的 vibe coding 以目標專案根目錄為主
-- 專案開發過程產生的 handoff 應跟著該專案保存
-- `vibe-starter` 位於 `vibe-coding/` 內，作為工具使用
-- `vibe-coding/.gitignore` 會忽略 `vibe-starter`
-
-## 9. 標準工作步驟
-
-```bash
-git clone <your-product-repo> /path/to/project
-cd /path/to/project
-mkdir vibe-coding && cd vibe-coding
-git clone https://....../vibe-starter
-cd /path/to/project
-bash ./vibe-coding/vibe-starter/scripts/init
-```
-
-## 10. 注意事項
-
-- `vibe-starter` 是專案內的工具目錄，不是產品原始碼主體
-- 一個 starter 初始化流程只對應一個專案
-- 需要人工閱讀與維護的說明文件，預設應保持中文
-
-## 11. 下一步
-
-- `init` 完成後，建議執行 `generate`
-- `generate` 用來建立 `vibe-coding/` 內的其他支援文件
-- `generate` 不負責產品原始碼初始化
-- `generate` 產出的每份文件都應包含用途說明、至少一個範例，以及可直接填寫的空白模板
-- 建議提示語：
-  - `請選擇要生成的文件：單一 / 多個 / 全部`
-  - `檔案已存在，是否覆寫？`
-  - `若不覆寫，請選擇：提供其他檔名 / 略過`
-  - `生成完成。已建立、覆寫、略過的檔案如下。`
-- 第一個建議生成的文件是 `vibe-coding/specs/0_project.md`
-- 第二個建議生成的文件是 `vibe-coding/specs/glossary.md`
-- 第三個建議生成的文件是 `vibe-coding/specs/roles.md`
-- 第四個建議生成的文件是 `vibe-coding/specs/objects.md`
-- 第五個建議生成的文件是 `vibe-coding/specs/behaviors.md`
-- 第六個建議生成的文件是 `vibe-coding/specs/flows.md`
-- 第七個建議生成的文件是 `vibe-coding/specs/boundaries.md`
-- 第八個建議生成的文件是 `vibe-coding/specs/states.md`
-- 第九個建議生成的文件是 `vibe-coding/specs/rules.md`
-- 第十個建議生成的文件是 `vibe-coding/specs/interfaces.md`
-- 第十一個建議生成的文件是 `vibe-coding/specs/decisions.md`
-- 第十二個建議生成的文件是 `vibe-coding/handoff/README.md`
-- 可選輔助文件是 `vibe-coding/specs/user_flows.md`
-- 若熟悉 spec 建模，可直接撰寫 `behaviors.md` 與 `flows.md`
-- 若想先用步驟流程描述需求，可先寫 `user_flows.md`，再由 AI 協助整理成正式 spec
-- 若已有可交接內容，建議提示：
-  - `目前已有可交接內容，是否要我整理 handoff？`
-
-## 12. `generate` 使用方式
-
-- 從產品專案根目錄執行
-- 支援 `single`、`multiple`、`all`
-- 選擇文件時，可使用正式 key、常用別名、或編號
-- 若不帶參數執行，會先進入模式編號選單，再進入文件編號選單
-
-範例：
+5. 生成工作文件
 
 ```bash
 bash ./vibe-coding/vibe-starter/scripts/generate
-bash ./vibe-coding/vibe-starter/scripts/generate single 0_project
-bash ./vibe-coding/vibe-starter/scripts/generate single project
+```
+
+## `init` 會做什麼
+
+`init` 目前會：
+
+- 確認你是從產品專案根目錄執行
+- 確保 `vibe-coding/` 存在
+- 建立或補齊 `vibe-coding/.gitignore`
+- 將 `vibe-starter` 加入 `vibe-coding/.gitignore`
+- 檢查根目錄 `AGENTS.md`
+- 若沒有 `AGENTS.md`，則建立一份基礎版
+- 若已有 `AGENTS.md`，則走衝突處理流程
+- 完成後提示下一步執行 `generate`
+
+基礎 `AGENTS.md` 模板位置：
+
+- `templates/AGENTS.md`
+
+## `generate` 會做什麼
+
+`generate` 目前會在產品專案的 `vibe-coding/` 下建立這些文件：
+
+- `specs/0_project.md`
+- `specs/glossary.md`
+- `specs/roles.md`
+- `specs/objects.md`
+- `specs/behaviors.md`
+- `specs/flows.md`
+- `specs/boundaries.md`
+- `specs/states.md`
+- `specs/rules.md`
+- `specs/interfaces.md`
+- `specs/decisions.md`
+- `handoff/README.md`
+- 可選：`specs/user_flows.md`
+
+這些文件的模板都位於：
+
+- `templates/vibe-coding/specs/`
+- `templates/vibe-coding/handoff/`
+
+## `generate` 使用方式
+
+可從產品專案根目錄執行：
+
+```bash
+bash ./vibe-coding/vibe-starter/scripts/generate
+```
+
+也可直接指定模式：
+
+```bash
 bash ./vibe-coding/vibe-starter/scripts/generate single 1
-bash ./vibe-coding/vibe-starter/scripts/generate multiple glossary roles objects
+bash ./vibe-coding/vibe-starter/scripts/generate single project
 bash ./vibe-coding/vibe-starter/scripts/generate multiple 2 role object
 bash ./vibe-coding/vibe-starter/scripts/generate all
 ```
 
-互動模式流程：
+### 模式
+
+- `single`
+- `multiple`
+- `all`
+
+若不帶參數執行，會進入互動式編號選單：
 
 1. 先選模式
-   - `1` 單一
-   - `2` 多個
-   - `3` 全部
-2. 若選 `1` 或 `2`，再從文件編號清單選擇目標文件
+   - `1. 單一`
+   - `2. 多個`
+   - `3. 全部`
+2. 若選 `1` 或 `2`，再選文件編號
 
-目前可用的文件 key / 別名 / 編號：
+### 文件編號 / key / 別名
 
 - `1` / `0_project` / `project`
 - `2` / `glossary` / `terms`
@@ -187,3 +189,42 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 - `11` / `decisions` / `decision`
 - `12` / `handoff` / `handoff_readme`
 - `13` / `user_flows` / `steps`
+
+## 衝突處理規則
+
+### `AGENTS.md`
+
+若根目錄已存在 `AGENTS.md`，會詢問：
+
+- 是否覆寫
+- 若不覆寫，可選：
+  - 提供其他檔名
+  - 略過
+
+### `generate` 產生的文件
+
+若目標檔案已存在，會詢問：
+
+- 是否覆寫
+- 若不覆寫，可選：
+  - 提供其他檔名
+  - 略過
+
+### `vibe-coding/.gitignore`
+
+- 不走覆寫流程
+- 若已存在，直接 append 必要內容
+
+## 使用後的工作方式
+
+執行完 `init` 與 `generate` 之後：
+
+- 產品開發仍以產品專案根目錄為主
+- spec 與 handoff 跟著產品專案走
+- `vibe-starter` 只是工具，不是產品原始碼的一部分
+
+## 注意事項
+
+- 這個 starter 目前是最小可用版本
+- 後續 spec 結構或模板格式仍可能調整
+- 需要人工閱讀與維護的文件，預設以中文為主
