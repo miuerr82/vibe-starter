@@ -43,6 +43,7 @@ Also read these before making substantive changes:
 * Immediately after finishing each task, record a handoff update; only after that, ask whether to continue or stop
 * Treat the user's continue-or-stop choice as the next action after handoff, not as a prerequisite for recording it
 * If there is no active `milestone`, or all `tasks in milestone` are already completed, do not force a continue-or-stop question; offer recommended next items if useful, while still preserving a stop option
+* For existing projects, first judge whether the change is a technical-only small change or a behavior-affecting change; only the latter requires minimum necessary spec before implementation
 * If the user does not know how to start, first offer structured starting options before deciding whether project-file inspection is needed
 
 ---
@@ -79,11 +80,13 @@ When implementing features:
 
 1. Read PROJECT-CONTEXT.md
 2. Create a plan using `milestone` and `tasks in milestone`
-3. Identify related spec (roles / objects / behaviors / flows), update spec if needed, and validate consistency
-4. Implement one task at a time
-5. After each task, update handoff immediately
-6. After handoff is recorded, ask whether to continue or stop
-7. Exception: if there is no active `milestone`, or all `tasks in milestone` are complete, do not ask to continue by default; instead offer recommended next items if any, and keep stop as an option
+3. Judge whether the change affects behavior, flow, rules, state, or object responsibility
+4. If it is a technical-only small change with no behavior change, implementation may proceed directly after consistency checks
+5. If it affects behavior, flow, rules, state, or object responsibility, add the minimum necessary spec first, then validate consistency
+6. Implement one task at a time
+7. After each task, update handoff immediately
+8. After handoff is recorded, ask whether to continue or stop
+9. Exception: if there is no active `milestone`, or all `tasks in milestone` are complete, do not ask to continue by default; instead offer recommended next items if any, and keep stop as an option
 
 ---
 
