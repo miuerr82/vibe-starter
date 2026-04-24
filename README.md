@@ -68,41 +68,6 @@ bash ./vibe-coding/vibe-starter/scripts/generate
 │  └─ vibe-starter/
 ```
 
-## 快速開始
-
-1. 建立並 clone 產品專案
-
-```bash
-git clone <your-product-repo> /path/to/project
-cd /path/to/project
-```
-
-2. 建立 `vibe-coding/`
-
-```bash
-mkdir -p vibe-coding
-cd vibe-coding
-```
-
-3. clone `vibe-starter`
-
-```bash
-git clone https://<your-repo>/vibe-starter
-cd /path/to/project
-```
-
-4. 執行初始化
-
-```bash
-bash ./vibe-coding/vibe-starter/scripts/init
-```
-
-5. 生成工作文件
-
-```bash
-bash ./vibe-coding/vibe-starter/scripts/generate
-```
-
 ## `init` 會做什麼
 
 `init` 目前會：
@@ -189,6 +154,47 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 - `11` / `decisions` / `decision`
 - `12` / `handoff` / `handoff_readme`
 - `13` / `user_flows` / `steps`
+
+## 初始化後的工作流程
+
+執行完 `init` 與 `generate` 之後，日常工作建議照這個順序進行：
+
+1. 先讀上下文
+   - 先閱讀專案根目錄 `AGENTS.md`
+   - 再讀 `vibe-coding/handoff/` 下最近的交接內容
+   - 若已有 spec，先看與當前工作相關的文件
+
+2. 先規劃，再執行
+   - 先整理本次工作的 `milestone`
+   - 再把每個 `milestone` 拆成 `tasks in milestone`
+   - 一次只處理一個 task
+
+3. 先補 spec，再做實作
+   - 若需求、物件、流程或規則還沒定義，先補 spec
+   - 若 spec、文件、實作不一致，先指出並補齊
+   - spec 明確後再進入實作
+
+4. task 完成後立即記錄 `handoff`
+   - 每完成一個 task，就先更新 `vibe-coding/handoff/`
+   - `handoff` 應記錄本次完成內容、目前狀態、下一步建議或待處理項目
+
+5. 再決定是否繼續
+   - 若目前 `milestone` 還有未完成 task，`handoff` 記錄完成後，再由使用者決定要繼續或停止
+   - 若沒有作用中的 `milestone`，或 task 已全部完成，則不必強制詢問是否繼續
+   - 這種情況下若有合理下一步，可以提供建議，但仍保留停止選項
+
+6. 如果不知道怎麼開始
+   - 先提供這三個選項：
+     - `我有明確的計畫。`
+     - `我還沒有完整計畫，但我知道想做的工作項目。`
+     - `我不知道該怎麼開始。`
+   - 若使用者選擇第三項，再先檢查相關檔案並提供建議
+
+這套流程的核心是：
+
+- 產品開發以產品專案根目錄為主
+- spec 與 handoff 跟著產品專案走
+- `vibe-starter` 只負責初始化與提供通用工作骨架
 
 ## 衝突處理規則
 
