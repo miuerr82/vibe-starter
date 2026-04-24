@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source "$(cd "$(dirname "$0")" && pwd)/lib/common.sh"
+
+ensure_project_root
+ensure_dir "${WORKSPACE_DIR}"
+
+append_unique_line "${WORKSPACE_DIR}/.gitignore" "vibe-starter"
+
+agents_summary=""
+copy_template_with_conflict_policy \
+  "${STARTER_ROOT}/templates/AGENTS.md" \
+  "${PROJECT_ROOT}/AGENTS.md" \
+  agents_summary
+
+print_summary "初始化完成。已處理項目如下。" \
+  "已確認產品專案根目錄" \
+  "已確保 vibe-coding/.gitignore 忽略 vibe-starter" \
+  "${agents_summary}"
+
+print_line "初始化完成。建議下一步執行 generate。"
