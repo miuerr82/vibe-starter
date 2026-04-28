@@ -8,6 +8,10 @@
 - 後續的 vibe coding、handoff、規格整理，都以此專案為主
 - `vibe-coding/vibe-starter` 是初始化與輔助工具目錄，不是產品原始碼主體
 - 進行實質修改前，應先閱讀此專案的 `AGENTS.md`、相關 `handoff/` 與其他必要上下文檔案
+- 若 `AGENTS.md` 已明確定義 spec 或 handoff 路徑，應優先依該明確定義執行
+- 若 `AGENTS.md` 未明確定義 spec 或 handoff 路徑，應先從專案內的 `vibe-coding/` 尋找相關目錄
+- 若找不到 `vibe-coding/`，可再搜尋其他 vibe-coding 相關目錄；若仍找不到，才建立新的 `vibe-coding/`
+- 若實際使用了 fallback 找到的路徑，應主動建議更新 `AGENTS.md`，把 spec 與 handoff 路徑寫明
 
 ## 工作原則
 
@@ -15,6 +19,8 @@
 - 未定義需求不要直接實作
 - 優先做增量更新，不覆蓋既有專案規則
 - 若發現規格、文件、實作不一致，應先指出並補齊規格
+- 事實、推論、缺口要分開；不可自行腦補成既定事實
+- 下專案判斷前，先指出依據；路徑、指令、版本、整合行為等高風險資訊要先確認
 - 先 planning，再 execution，並以 `milestone` 與 `tasks in milestone` 拆分工作
 - 預設使用者為公司同仁，回覆與引導應以內部協作語境為主
 

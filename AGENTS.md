@@ -34,10 +34,16 @@ Also read these before making substantive changes:
 # 🧭 Working Habits
 
 * Read `AGENTS.md`, `PROJECT-CONTEXT.md`, and relevant `handoff/` notes before planning work
+* If `AGENTS.md` explicitly defines spec or handoff paths, follow those explicit paths first
+* If `AGENTS.md` does not explicitly define spec or handoff paths, look for a project-local `vibe-coding/` workspace before assuming any other location
+* Check `vibe-coding/` first, then other vibe-coding-related directories, and only create a new `vibe-coding/` workspace when no suitable directory exists
+* If fallback discovery determines the effective spec or handoff path, request an `AGENTS.md` update so the resolved path becomes explicit for later work
 * Start with planning, then execution, and structure work as `milestone` and `tasks in milestone`
 * Treat human-maintained docs, specs, templates, and handoff files as Chinese-first unless the project explicitly requires another language
 * Assume the primary users are internal company colleagues unless the project context says otherwise
 * Make focused incremental edits instead of broad rewrites
+* Distinguish facts, inference, and missing context; never present inference as confirmed truth
+* Cite the source basis before project-specific conclusions, and verify high-risk details such as paths, commands, versions, and integrations before relying on them
 * Call out spec / docs / implementation mismatches before extending behavior
 * Keep product-project artifacts inside the product project; only change `vibe-starter` when adjusting reusable starter capability
 * Immediately after finishing each task, record a handoff update; only after that, ask whether to continue or stop

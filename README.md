@@ -264,6 +264,10 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 
 1. 先讀上下文
    - 先閱讀專案根目錄 `AGENTS.md`
+   - 若 `AGENTS.md` 已明確寫出 spec 或 handoff 路徑，優先使用該路徑
+   - 若 `AGENTS.md` 沒有明確寫出路徑，先從 `vibe-coding/` 找起
+   - 若沒有 `vibe-coding/`，再搜尋其他 vibe-coding 相關目錄；若仍找不到，才建立新的 `vibe-coding/`
+   - 若本次是靠 fallback 才找到有效路徑，應建議補寫回 `AGENTS.md`
    - 再讀 `vibe-coding/handoff/` 下最近的交接內容
    - 若已有 spec，先看與當前工作相關的文件
 
