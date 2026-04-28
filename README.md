@@ -12,17 +12,96 @@
 
 ## Quick Start
 
-如果你是第一次使用，先照這 5 步做即可：
+如果你是第一次使用，先照下面其中一種方式做即可。
+
+### 方式 A：Linux / macOS
+
+適合已有 `git`，並使用 `bash` 的環境。
 
 ```bash
 git clone <your-product-repo> /path/to/project
 cd /path/to/project
 mkdir -p vibe-coding
 cd vibe-coding
-git clone https://<your-repo>/vibe-starter
+git clone https://github.com/miuerr82/vibe-starter.git
 cd /path/to/project
 bash ./vibe-coding/vibe-starter/scripts/init
 bash ./vibe-coding/vibe-starter/scripts/generate
+```
+
+### 方式 B：Windows
+
+適合已有 `git`，並使用 PowerShell 或 cmd 的環境。
+
+先取得 starter：
+
+```powershell
+git clone <your-product-repo> C:\path\to\project
+Set-Location C:\path\to\project
+New-Item -ItemType Directory -Force vibe-coding
+Set-Location .\vibe-coding
+git clone https://github.com/miuerr82/vibe-starter.git
+Set-Location C:\path\to\project
+```
+
+再執行 starter：
+
+```powershell
+.\vibe-coding\vibe-starter\scripts\init.ps1
+.\vibe-coding\vibe-starter\scripts\generate.ps1
+```
+
+或：
+
+```cmd
+cd /d C:\path\to\project
+if not exist vibe-coding mkdir vibe-coding
+cd vibe-coding
+git clone https://github.com/miuerr82/vibe-starter.git
+cd /d C:\path\to\project
+.\vibe-coding\vibe-starter\scripts\init.cmd
+.\vibe-coding\vibe-starter\scripts\generate.cmd
+```
+
+### 方式 C：沒有 `git`
+
+1. 先下載產品專案到本機，並進入產品專案根目錄。
+2. 建立 `vibe-coding/` 目錄。
+3. 開啟 `https://github.com/miuerr82/vibe-starter/tags`。
+4. 下載最新 tag 的原始碼壓縮檔。
+5. 解壓縮後，若資料夾名稱帶有版本號，請重新命名為 `vibe-starter`。
+6. 將該資料夾放到產品專案的 `vibe-coding/` 下面，使路徑成為 `vibe-coding/vibe-starter`。
+7. 回到產品專案根目錄後，執行 `init` 與 `generate`。
+
+例如：
+
+```text
+<project-root>/
+├─ vibe-coding/
+│  └─ vibe-starter/
+```
+
+之後可依你的 shell 選擇對應入口：
+
+Linux / macOS：
+
+```bash
+bash ./vibe-coding/vibe-starter/scripts/init
+bash ./vibe-coding/vibe-starter/scripts/generate
+```
+
+Windows PowerShell：
+
+```powershell
+.\vibe-coding\vibe-starter\scripts\init.ps1
+.\vibe-coding\vibe-starter\scripts\generate.ps1
+```
+
+Windows cmd：
+
+```cmd
+.\vibe-coding\vibe-starter\scripts\init.cmd
+.\vibe-coding\vibe-starter\scripts\generate.cmd
 ```
 
 做完之後，你會得到：
@@ -67,6 +146,8 @@ bash ./vibe-coding/vibe-starter/scripts/generate
 ├─ vibe-coding/
 │  └─ vibe-starter/
 ```
+
+不論你是用 `git clone` 還是從 tags 下載最新版，只要最後目錄位置一致，後續工作流程就相同。
 
 ## `init` 會做什麼
 
@@ -116,6 +197,14 @@ bash ./vibe-coding/vibe-starter/scripts/generate
 bash ./vibe-coding/vibe-starter/scripts/generate
 ```
 
+```powershell
+.\vibe-coding\vibe-starter\scripts\generate.ps1
+```
+
+```cmd
+.\vibe-coding\vibe-starter\scripts\generate.cmd
+```
+
 也可直接指定模式：
 
 ```bash
@@ -123,6 +212,20 @@ bash ./vibe-coding/vibe-starter/scripts/generate single 1
 bash ./vibe-coding/vibe-starter/scripts/generate single project
 bash ./vibe-coding/vibe-starter/scripts/generate multiple 2 role object
 bash ./vibe-coding/vibe-starter/scripts/generate all
+```
+
+```powershell
+.\vibe-coding\vibe-starter\scripts\generate.ps1 single 1
+.\vibe-coding\vibe-starter\scripts\generate.ps1 single project
+.\vibe-coding\vibe-starter\scripts\generate.ps1 multiple 2 role object
+.\vibe-coding\vibe-starter\scripts\generate.ps1 all
+```
+
+```cmd
+.\vibe-coding\vibe-starter\scripts\generate.cmd single 1
+.\vibe-coding\vibe-starter\scripts\generate.cmd single project
+.\vibe-coding\vibe-starter\scripts\generate.cmd multiple 2 role object
+.\vibe-coding\vibe-starter\scripts\generate.cmd all
 ```
 
 ### 模式
