@@ -14,6 +14,8 @@ $Script:ProjectRoot = (Get-Location).Path
 $Script:WorkspaceDir = Join-Path $Script:ProjectRoot "vibe-coding"
 $Script:SpecsDir = Join-Path $Script:WorkspaceDir "specs"
 $Script:HandoffDir = Join-Path $Script:WorkspaceDir "handoff"
+$Script:MilestonesDir = Join-Path $Script:WorkspaceDir "milestones"
+$Script:MilestoneTasksDir = Join-Path $Script:MilestonesDir "tasks"
 
 function Write-Line {
   param(

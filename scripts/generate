@@ -19,6 +19,8 @@ FILE_KEYS=(
   "interfaces"
   "decisions"
   "handoff"
+  "milestones"
+  "milestone_tasks"
   "user_flows"
 )
 
@@ -35,6 +37,8 @@ ALIASES=(
   "interface"
   "decision"
   "handoff_readme"
+  "milestone_index"
+  "tasks_readme"
   "steps"
 )
 
@@ -51,6 +55,8 @@ MENU_LABELS=(
   "介面"
   "決策"
   "交接說明"
+  "Milestone 總表"
+  "Milestone tasks 說明"
   "步驟流程"
 )
 
@@ -77,7 +83,9 @@ canonical_key() {
     10|interfaces|interface) print_line "interfaces" ;;
     11|decisions|decision) print_line "decisions" ;;
     12|handoff|handoff_readme) print_line "handoff" ;;
-    13|user_flows|steps) print_line "user_flows" ;;
+    13|milestones|milestone_index) print_line "milestones" ;;
+    14|milestone_tasks|tasks_readme) print_line "milestone_tasks" ;;
+    15|user_flows|steps) print_line "user_flows" ;;
     *) return 1 ;;
   esac
 }
@@ -96,6 +104,8 @@ template_path_for() {
     interfaces) print_line "${STARTER_ROOT}/templates/vibe-coding/specs/interfaces.md" ;;
     decisions) print_line "${STARTER_ROOT}/templates/vibe-coding/specs/decisions.md" ;;
     handoff) print_line "${STARTER_ROOT}/templates/vibe-coding/handoff/README.md" ;;
+    milestones) print_line "${STARTER_ROOT}/templates/vibe-coding/milestones/index.md" ;;
+    milestone_tasks) print_line "${STARTER_ROOT}/templates/vibe-coding/milestones/tasks/README.md" ;;
     user_flows) print_line "${STARTER_ROOT}/templates/vibe-coding/specs/user_flows.md" ;;
     *) return 1 ;;
   esac
@@ -115,6 +125,8 @@ target_path_for() {
     interfaces) print_line "${SPECS_DIR}/interfaces.md" ;;
     decisions) print_line "${SPECS_DIR}/decisions.md" ;;
     handoff) print_line "${HANDOFF_DIR}/README.md" ;;
+    milestones) print_line "${MILESTONES_DIR}/index.md" ;;
+    milestone_tasks) print_line "${MILESTONE_TASKS_DIR}/README.md" ;;
     user_flows) print_line "${SPECS_DIR}/user_flows.md" ;;
     *) return 1 ;;
   esac
@@ -213,6 +225,8 @@ main() {
   ensure_dir "${WORKSPACE_DIR}"
   ensure_dir "${SPECS_DIR}"
   ensure_dir "${HANDOFF_DIR}"
+  ensure_dir "${MILESTONES_DIR}"
+  ensure_dir "${MILESTONE_TASKS_DIR}"
 
   while IFS= read -r selected; do
     [[ -n "${selected}" ]] || continue
@@ -221,7 +235,9 @@ main() {
 
   print_summary "生成完成。已建立、覆寫、略過的檔案如下。" "${GENERATED_SUMMARY[@]}"
 
-  if printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'user_flows'; then
+  if printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'milestones'; then
+    print_line "下一步建議：先查看 vibe-coding/milestones/index.md，整理目前 milestone 與工作順序。"
+  elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'user_flows'; then
     print_line "下一步建議：可請 AI 依 user_flows.md 協助補入 behaviors.md 與 flows.md。"
   else
     print_line "下一步建議：先補 0_project.md、glossary.md、roles.md。"
