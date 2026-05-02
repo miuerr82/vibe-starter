@@ -8,6 +8,8 @@ PROJECT_ROOT="$(pwd)"
 WORKSPACE_DIR="${PROJECT_ROOT}/vibe-coding"
 SPECS_DIR="${WORKSPACE_DIR}/specs"
 HANDOFF_DIR="${WORKSPACE_DIR}/handoff"
+MILESTONES_DIR="${WORKSPACE_DIR}/milestones"
+MILESTONE_TASKS_DIR="${MILESTONES_DIR}/tasks"
 
 readonly SCRIPT_DIR
 readonly STARTER_ROOT
@@ -15,6 +17,8 @@ readonly PROJECT_ROOT
 readonly WORKSPACE_DIR
 readonly SPECS_DIR
 readonly HANDOFF_DIR
+readonly MILESTONES_DIR
+readonly MILESTONE_TASKS_DIR
 
 print_line() {
   printf '%s\n' "$1"

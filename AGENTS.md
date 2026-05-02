@@ -39,6 +39,8 @@ Also read these before making substantive changes:
 * Check `vibe-coding/` first, then other vibe-coding-related directories, and only create a new `vibe-coding/` workspace when no suitable directory exists
 * If fallback discovery determines the effective spec or handoff path, request an `AGENTS.md` update so the resolved path becomes explicit for later work
 * Start with planning, then execution, and structure work as `milestone` and `tasks in milestone`
+* Reusable milestone support belongs under `vibe-coding/milestones/index.md` and `vibe-coding/milestones/tasks/` in generated product projects
+* Keep generated milestone guidance consistent across `templates/AGENTS.md`, `templates/vibe-coding/milestones/`, README, and all `generate` launchers
 * Treat human-maintained docs, specs, templates, and handoff files as Chinese-first unless the project explicitly requires another language
 * Assume the primary users are internal company colleagues unless the project context says otherwise
 * Make focused incremental edits instead of broad rewrites

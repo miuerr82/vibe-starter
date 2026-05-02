@@ -110,6 +110,7 @@ Windows cmd：
 - `vibe-coding/.gitignore`
 - `vibe-coding/specs/` 下的 spec 模板
 - `vibe-coding/handoff/` 下的 handoff 模板
+- `vibe-coding/milestones/` 下的 milestone 追蹤模板
 
 ## 這個專案的用途
 
@@ -121,7 +122,7 @@ Windows cmd：
    - 建立 `vibe-coding/.gitignore`
 
 2. `generate`
-   - 在 `vibe-coding/` 下生成 spec 與 handoff 模板
+   - 在 `vibe-coding/` 下生成 spec、handoff 與 milestone 模板
    - 協助專案快速進入 spec-driven 工作方式
 
 目前第一版聚焦在：
@@ -182,12 +183,15 @@ Windows cmd：
 - `specs/interfaces.md`
 - `specs/decisions.md`
 - `handoff/README.md`
+- `milestones/index.md`
+- `milestones/tasks/README.md`
 - 可選：`specs/user_flows.md`
 
 這些文件的模板都位於：
 
 - `templates/vibe-coding/specs/`
 - `templates/vibe-coding/handoff/`
+- `templates/vibe-coding/milestones/`
 
 ## `generate` 使用方式
 
@@ -256,7 +260,9 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 - `10` / `interfaces` / `interface`
 - `11` / `decisions` / `decision`
 - `12` / `handoff` / `handoff_readme`
-- `13` / `user_flows` / `steps`
+- `13` / `milestones` / `milestone_index`
+- `14` / `milestone_tasks` / `tasks_readme`
+- `15` / `user_flows` / `steps`
 
 ## 初始化後的工作流程
 
@@ -274,6 +280,11 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 2. 先規劃，再執行
    - 先整理本次工作的 `milestone`
    - 再把每個 `milestone` 拆成 `tasks in milestone`
+   - milestone 總表放在 `vibe-coding/milestones/index.md`
+   - milestone tasks 詳細內容放在 `vibe-coding/milestones/tasks/<milestone-id>.md`
+   - 總表依 `work_order` 提供工作順序，`priority` 只作為選填的重要性提示
+   - 總表中的 `manual_pending_task_refs` 只記錄使用者手動 pending 的商業決策項，不由 AI 自動推導
+   - `actual_duration` 使用 `00h:00m`，`elapsed_calendar_duration` 以天為單位並保留小數點兩位
    - 一次只處理一個 task
 
 3. 先判斷是否需要補 spec

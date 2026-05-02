@@ -12,6 +12,8 @@
 - 若 `AGENTS.md` 未明確定義 spec 或 handoff 路徑，應先從專案內的 `vibe-coding/` 尋找相關目錄
 - 若找不到 `vibe-coding/`，可再搜尋其他 vibe-coding 相關目錄；若仍找不到，才建立新的 `vibe-coding/`
 - 若實際使用了 fallback 找到的路徑，應主動建議更新 `AGENTS.md`，把 spec 與 handoff 路徑寫明
+- 預設 milestone 總表路徑為 `vibe-coding/milestones/index.md`
+- 預設 milestone tasks 目錄為 `vibe-coding/milestones/tasks/`
 
 ## 工作原則
 
@@ -22,6 +24,7 @@
 - 事實、推論、缺口要分開；不可自行腦補成既定事實
 - 下專案判斷前，先指出依據；路徑、指令、版本、整合行為等高風險資訊要先確認
 - 先 planning，再 execution，並以 `milestone` 與 `tasks in milestone` 拆分工作
+- 若存在 `vibe-coding/milestones/index.md`，應優先用它判斷目前工作順序與進度
 - 預設使用者為公司同仁，回覆與引導應以內部協作語境為主
 
 ## 文件與語言規則
@@ -38,6 +41,12 @@
 ## 工作流程
 
 - 開始執行前，先整理計畫，列出 `milestone` 與 `tasks in milestone`，並確認對應 spec、文件與上下文完整
+- milestone 應記錄在 `vibe-coding/milestones/index.md`；每個 milestone 的 task 詳細內容應記錄在 `vibe-coding/milestones/tasks/<milestone-id>.md`
+- milestone 總表應使用固定欄位順序：`milestone_id`, `work_order`, `priority`, `status`, `ignored`, `title`, `task_status_summary`, `manual_pending_task_refs`, `started_at`, `completed_at`, `actual_duration`, `elapsed_calendar_duration`, `tasks_file_path`
+- `work_order` 是明確工作順序；`priority` 是選填重要性提示，不可覆蓋 `work_order`
+- `ignored` 或 `blocked` 的 milestone 不應被建議為下一步，除非使用者明確要求查看
+- `manual_pending_task_refs` 只記錄使用者手動 pending 的商業決策項，不可由 AI 自動推導
+- `actual_duration` 使用 `00h:00m`；`elapsed_calendar_duration` 以天為單位並保留小數點兩位
 - 若是舊專案，先判斷這次修改是否只屬於純技術性、小範圍且不改行為的調整
 - 若會影響行為、流程、規則、狀態或物件責任，先補最小必要 spec，再進入實作
 - 每次只處理一個 task
