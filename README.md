@@ -111,6 +111,7 @@ Windows cmd：
 - `vibe-coding/specs/` 下的 spec 模板
 - `vibe-coding/handoff/` 下的 handoff 模板
 - `vibe-coding/milestones/` 下的 milestone 追蹤模板
+- `vibe-coding/features/` 下的 feature 討論模板
 
 ## 這個專案的用途
 
@@ -122,7 +123,7 @@ Windows cmd：
    - 建立 `vibe-coding/.gitignore`
 
 2. `generate`
-   - 在 `vibe-coding/` 下生成 spec、handoff 與 milestone 模板
+   - 在 `vibe-coding/` 下生成 spec、handoff、milestone 與 feature 討論模板
    - 協助專案快速進入 spec-driven 工作方式
 
 目前第一版聚焦在：
@@ -185,6 +186,8 @@ Windows cmd：
 - `handoff/README.md`
 - `milestones/index.md`
 - `milestones/tasks/README.md`
+- `features/README.md`
+- `features/index.md`
 - 可選：`specs/user_flows.md`
 
 這些文件的模板都位於：
@@ -192,6 +195,7 @@ Windows cmd：
 - `templates/vibe-coding/specs/`
 - `templates/vibe-coding/handoff/`
 - `templates/vibe-coding/milestones/`
+- `templates/vibe-coding/features/`
 
 ## `generate` 使用方式
 
@@ -262,7 +266,9 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 - `12` / `handoff` / `handoff_readme`
 - `13` / `milestones` / `milestone_index`
 - `14` / `milestone_tasks` / `tasks_readme`
-- `15` / `user_flows` / `steps`
+- `15` / `features` / `feature_readme`
+- `16` / `feature_index` / `features_index`
+- `17` / `user_flows` / `steps`
 
 ## 初始化後的工作流程
 
@@ -293,16 +299,24 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
    - 若 spec、文件、實作不一致，先指出並補齊
    - spec 明確後再進入實作
 
-4. task 完成後立即記錄 `handoff`
-   - 每完成一個 task，就先更新 `vibe-coding/handoff/`
+4. 工作階段完成後詢問是否記錄 `handoff`
+   - 每段工作階段完成後，若已完成或暫停 1 個以上 milestone 或 task，先詢問是否整理 handoff
+   - 使用者第一次要求 `記錄進度` 或 `記錄交接進度` 時，先解析 handoff 位置；若 `AGENTS.md` 沒有明確定義，先找 `vibe-coding/handoff/`
    - `handoff` 應記錄本次完成內容、目前狀態、下一步建議或待處理項目
 
-5. 再決定是否繼續
+5. feature 討論先放在獨立區域
+   - feature 討論未轉成正式 spec 前，先放在 `vibe-coding/features/`
+   - 當 feature 討論到可暫存點時，AI 應詢問是否保留完整討論
+   - 若保留完整討論，寫入 `vibe-coding/features/<feature-id>.md` 並更新 `features/index.md`
+   - 若不保留完整討論，只在 `features/index.md` 留短記錄：`曾討論：<title>。後續要討論 / 保留 / 棄用？`
+   - 已確認 feature 可作為優化時的優先提示，但不可自動覆蓋 milestone `work_order`
+
+6. 再決定是否繼續
    - 若目前 `milestone` 還有未完成 task，`handoff` 記錄完成後，再由使用者決定要繼續或停止
    - 若沒有作用中的 `milestone`，或 task 已全部完成，則不必強制詢問是否繼續
    - 這種情況下若有合理下一步，可以提供建議，但仍保留停止選項
 
-6. 如果不知道怎麼開始
+7. 如果不知道怎麼開始
    - 先提供這三個選項：
      - `我有明確的計畫。`
      - `我還沒有完整計畫，但我知道想做的工作項目。`
@@ -359,6 +373,14 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 - `請幫我整理這個 task 的 handoff 內容。`
 - `請幫我整理這個 task 完成後的下一步建議。`
 - `請幫我確認目前這個 milestone 還剩下哪些 tasks。`
+
+### feature 討論用
+
+- `我有一個 feature 方向，請先跟我討論，不要直接寫進 spec。`
+- `這個 feature 討論先暫存，請問我要保留完整討論嗎？`
+- `請幫我把剛才的 feature 討論保留到 features。`
+- `請只留下這個 feature 的簡短記錄，之後再決定要討論、保留或棄用。`
+- `請查看 confirmed features，幫我提出目前優化時最值得優先考慮的方向。`
 
 ## 衝突處理規則
 

@@ -18,6 +18,8 @@ $FileKeys = @(
   "handoff",
   "milestones",
   "milestone_tasks",
+  "features",
+  "feature_index",
   "user_flows"
 )
 
@@ -36,6 +38,8 @@ $Aliases = @(
   "handoff_readme",
   "milestone_index",
   "tasks_readme",
+  "feature_readme",
+  "features_index",
   "steps"
 )
 
@@ -54,6 +58,8 @@ $MenuLabels = @(
   "交接說明",
   "Milestone 總表",
   "Milestone tasks 說明",
+  "Feature 討論說明",
+  "Feature 討論索引",
   "步驟流程"
 )
 
@@ -117,7 +123,13 @@ function Get-CanonicalKey {
     "14" { return "milestone_tasks" }
     "milestone_tasks" { return "milestone_tasks" }
     "tasks_readme" { return "milestone_tasks" }
-    "15" { return "user_flows" }
+    "15" { return "features" }
+    "features" { return "features" }
+    "feature_readme" { return "features" }
+    "16" { return "feature_index" }
+    "feature_index" { return "feature_index" }
+    "features_index" { return "feature_index" }
+    "17" { return "user_flows" }
     "user_flows" { return "user_flows" }
     "steps" { return "user_flows" }
     default { return $null }
@@ -142,6 +154,8 @@ function Get-TemplatePath {
     "handoff" { return (Join-Path $Script:StarterRoot "templates\vibe-coding\handoff\README.md") }
     "milestones" { return (Join-Path $Script:StarterRoot "templates\vibe-coding\milestones\index.md") }
     "milestone_tasks" { return (Join-Path $Script:StarterRoot "templates\vibe-coding\milestones\tasks\README.md") }
+    "features" { return (Join-Path $Script:StarterRoot "templates\vibe-coding\features\README.md") }
+    "feature_index" { return (Join-Path $Script:StarterRoot "templates\vibe-coding\features\index.md") }
     "user_flows" { return (Join-Path $Script:StarterRoot "templates\vibe-coding\specs\user_flows.md") }
     default { Fail "不支援的文件 key：$Key" }
   }
@@ -165,6 +179,8 @@ function Get-TargetPath {
     "handoff" { return (Join-Path $Script:HandoffDir "README.md") }
     "milestones" { return (Join-Path $Script:MilestonesDir "index.md") }
     "milestone_tasks" { return (Join-Path $Script:MilestoneTasksDir "README.md") }
+    "features" { return (Join-Path $Script:FeaturesDir "README.md") }
+    "feature_index" { return (Join-Path $Script:FeaturesDir "index.md") }
     "user_flows" { return (Join-Path $Script:SpecsDir "user_flows.md") }
     default { Fail "不支援的文件 key：$Key" }
   }
@@ -241,6 +257,7 @@ try {
   Ensure-Dir $Script:HandoffDir
   Ensure-Dir $Script:MilestonesDir
   Ensure-Dir $Script:MilestoneTasksDir
+  Ensure-Dir $Script:FeaturesDir
 
   $mode = if ($args.Count -gt 0) { [string]$args[0] } else { "" }
   $remainingArgs = if ($args.Count -gt 1) { $args[1..($args.Count - 1)] } else { @() }
@@ -263,7 +280,9 @@ try {
 
   Print-Summary -Title "生成完成。已建立、覆寫、略過的檔案如下。" -Items $generatedSummary
 
-  if ($generatedSummary | Where-Object { $_ -match "milestones" }) {
+  if ($generatedSummary | Where-Object { $_ -match "features" }) {
+    Write-Line "下一步建議：可查看 vibe-coding/features/index.md，整理已討論、已確認或待保留的 feature。"
+  } elseif ($generatedSummary | Where-Object { $_ -match "milestones" }) {
     Write-Line "下一步建議：先查看 vibe-coding/milestones/index.md，整理目前 milestone 與工作順序。"
   } elseif ($generatedSummary | Where-Object { $_ -match "user_flows" }) {
     Write-Line "下一步建議：可請 AI 依 user_flows.md 協助補入 behaviors.md 與 flows.md。"

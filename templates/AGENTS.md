@@ -14,6 +14,7 @@
 - 若實際使用了 fallback 找到的路徑，應主動建議更新 `AGENTS.md`，把 spec 與 handoff 路徑寫明
 - 預設 milestone 總表路徑為 `vibe-coding/milestones/index.md`
 - 預設 milestone tasks 目錄為 `vibe-coding/milestones/tasks/`
+- 預設 feature 討論目錄為 `vibe-coding/features/`
 
 ## 工作原則
 
@@ -25,6 +26,7 @@
 - 下專案判斷前，先指出依據；路徑、指令、版本、整合行為等高風險資訊要先確認
 - 先 planning，再 execution，並以 `milestone` 與 `tasks in milestone` 拆分工作
 - 若存在 `vibe-coding/milestones/index.md`，應優先用它判斷目前工作順序與進度
+- 若存在 `vibe-coding/features/index.md`，優化或擴充討論時應先查看已確認的 feature，再查看短記錄與討論中項目
 - 預設使用者為公司同仁，回覆與引導應以內部協作語境為主
 
 ## 文件與語言規則
@@ -50,10 +52,22 @@
 - 若是舊專案，先判斷這次修改是否只屬於純技術性、小範圍且不改行為的調整
 - 若會影響行為、流程、規則、狀態或物件責任，先補最小必要 spec，再進入實作
 - 每次只處理一個 task
-- 每完成一個 task，立即更新 `handoff`
+- 每段工作階段完成後，若已完成或暫停 1 個以上 milestone 或 task，應詢問使用者是否要整理 handoff
+- 使用者第一次要求 `記錄進度`、`記錄交接進度` 或等價要求時，應先解析 handoff 位置；若 `AGENTS.md` 沒有明確定義，先找 `vibe-coding/handoff/`，不可先自行發明其他資料夾
+- 若使用者同意記錄 handoff，應整理完成內容、目前狀態、下一步與風險後寫入 handoff
 - `handoff` 記錄完成後，若仍有未完成的 `tasks in milestone`，再詢問使用者要繼續或停止
 - 使用者的繼續或停止，是 `handoff` 之後的下一步決策，不是記錄 `handoff` 的前提
 - 若沒有作用中的 `milestone`，或 `tasks in milestone` 已全部完成，則不強制詢問是否繼續；若有合理下一步，可提供建議，但仍保留停止選項
+
+## Feature 討論
+
+- feature 討論不直接放進 `vibe-coding/specs/`；未成為正式規格前，應放在 `vibe-coding/features/`
+- 當使用者提出 feature 方向並討論到可暫存點時，AI 應詢問是否保留完整 feature 討論
+- 可暫存點包含：已提出方向、已辨識問題或使用者意圖、已比較選項、留下值得回顧的問題、即將切換主題，或討論暫停但尚未進入正式 spec / milestone
+- 若使用者確認保留，將完整討論整理成 `vibe-coding/features/<feature-id>.md`，並更新 `vibe-coding/features/index.md`
+- 若使用者未確認保留，只在 `vibe-coding/features/index.md` 留下短記錄：`曾討論：<title>。後續要討論 / 保留 / 棄用？`
+- 已確認的 feature 可在使用者要求優化或改善專案時優先提示
+- 已確認的 feature 不可自動覆蓋 milestone `work_order`，也不可未經使用者確認就轉成正式 spec 或 milestone task
 
 ## 起手引導
 
