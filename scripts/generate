@@ -23,6 +23,9 @@ FILE_KEYS=(
   "milestone_tasks"
   "features"
   "feature_index"
+  "layouts"
+  "layout_index"
+  "ui_design_system"
   "user_flows"
 )
 
@@ -43,6 +46,9 @@ ALIASES=(
   "tasks_readme"
   "feature_readme"
   "features_index"
+  "layout_readme"
+  "layouts_index"
+  "design_system"
   "steps"
 )
 
@@ -63,6 +69,9 @@ MENU_LABELS=(
   "Milestone tasks 說明"
   "Feature 討論說明"
   "Feature 討論索引"
+  "Layout 設計說明"
+  "Layout 索引"
+  "UI Design System"
   "步驟流程"
 )
 
@@ -93,7 +102,10 @@ canonical_key() {
     14|milestone_tasks|tasks_readme) print_line "milestone_tasks" ;;
     15|features|feature_readme) print_line "features" ;;
     16|feature_index|features_index) print_line "feature_index" ;;
-    17|user_flows|steps) print_line "user_flows" ;;
+    17|layouts|layout_readme) print_line "layouts" ;;
+    18|layout_index|layouts_index) print_line "layout_index" ;;
+    19|ui_design_system|design_system) print_line "ui_design_system" ;;
+    20|user_flows|steps) print_line "user_flows" ;;
     *) return 1 ;;
   esac
 }
@@ -116,6 +128,9 @@ template_path_for() {
     milestone_tasks) print_line "${STARTER_ROOT}/templates/vibe-coding/milestones/tasks/README.md" ;;
     features) print_line "${STARTER_ROOT}/templates/vibe-coding/features/README.md" ;;
     feature_index) print_line "${STARTER_ROOT}/templates/vibe-coding/features/index.md" ;;
+    layouts) print_line "${STARTER_ROOT}/templates/vibe-coding/layouts/README.md" ;;
+    layout_index) print_line "${STARTER_ROOT}/templates/vibe-coding/layouts/index.md" ;;
+    ui_design_system) print_line "${STARTER_ROOT}/templates/vibe-coding/ui/design-system.md" ;;
     user_flows) print_line "${STARTER_ROOT}/templates/vibe-coding/specs/user_flows.md" ;;
     *) return 1 ;;
   esac
@@ -139,6 +154,9 @@ target_path_for() {
     milestone_tasks) print_line "${MILESTONE_TASKS_DIR}/README.md" ;;
     features) print_line "${FEATURES_DIR}/README.md" ;;
     feature_index) print_line "${FEATURES_DIR}/index.md" ;;
+    layouts) print_line "${LAYOUTS_DIR}/README.md" ;;
+    layout_index) print_line "${LAYOUTS_DIR}/index.md" ;;
+    ui_design_system) print_line "${UI_DIR}/design-system.md" ;;
     user_flows) print_line "${SPECS_DIR}/user_flows.md" ;;
     *) return 1 ;;
   esac
@@ -240,6 +258,8 @@ main() {
   ensure_dir "${MILESTONES_DIR}"
   ensure_dir "${MILESTONE_TASKS_DIR}"
   ensure_dir "${FEATURES_DIR}"
+  ensure_dir "${LAYOUTS_DIR}"
+  ensure_dir "${UI_DIR}"
 
   while IFS= read -r selected; do
     [[ -n "${selected}" ]] || continue
@@ -250,6 +270,8 @@ main() {
 
   if printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'features'; then
     print_line "下一步建議：可查看 vibe-coding/features/index.md，整理已討論、已確認或待保留的 feature。"
+  elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'layouts\|design-system'; then
+    print_line "下一步建議：先確認技術決策與是否需要 UI/UX Designer 協助，再整理 vibe-coding/ui/design-system.md 與 vibe-coding/layouts/index.md。"
   elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'milestones'; then
     print_line "下一步建議：先查看 vibe-coding/milestones/index.md，整理目前 milestone 與工作順序。"
   elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'user_flows'; then
