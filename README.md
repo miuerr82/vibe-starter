@@ -112,6 +112,8 @@ Windows cmd：
 - `vibe-coding/handoff/` 下的 handoff 模板
 - `vibe-coding/milestones/` 下的 milestone 追蹤模板
 - `vibe-coding/features/` 下的 feature 討論模板
+- `vibe-coding/layouts/` 下的 layout 設計模板
+- `vibe-coding/ui/` 下的 UI contract 模板
 
 ## 這個專案的用途
 
@@ -188,6 +190,9 @@ Windows cmd：
 - `milestones/tasks/README.md`
 - `features/README.md`
 - `features/index.md`
+- `layouts/README.md`
+- `layouts/index.md`
+- `ui/design-system.md`
 - 可選：`specs/user_flows.md`
 
 這些文件的模板都位於：
@@ -196,6 +201,8 @@ Windows cmd：
 - `templates/vibe-coding/handoff/`
 - `templates/vibe-coding/milestones/`
 - `templates/vibe-coding/features/`
+- `templates/vibe-coding/layouts/`
+- `templates/vibe-coding/ui/`
 
 ## `generate` 使用方式
 
@@ -268,7 +275,10 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 - `14` / `milestone_tasks` / `tasks_readme`
 - `15` / `features` / `feature_readme`
 - `16` / `feature_index` / `features_index`
-- `17` / `user_flows` / `steps`
+- `17` / `layouts` / `layout_readme`
+- `18` / `layout_index` / `layouts_index`
+- `19` / `ui_design_system` / `design_system`
+- `20` / `user_flows` / `steps`
 
 ## 初始化後的工作流程
 
@@ -311,12 +321,22 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
    - 若不保留完整討論，只在 `features/index.md` 留短記錄：`曾討論：<title>。後續要討論 / 保留 / 棄用？`
    - 已確認 feature 可作為優化時的優先提示，但不可自動覆蓋 milestone `work_order`
 
-6. 再決定是否繼續
+6. 畫面設計先固化 UI contract 與 layout
+   - 進入畫面實作前，先確認相關技術決策是否已記錄在 `vibe-coding/specs/decisions.md`
+   - 再詢問是否需要 UI/UX Designer 協助
+   - 若需要，由 UI/UX Designer 先提出 UI/UX 規劃、互動方式、視覺方向與 layout 方案，使用者確認後再固化
+   - 若不需要，由 AI 直接用選項與建議和使用者討論畫面設計細節
+   - 跨頁 UI 規則記錄在 `vibe-coding/ui/design-system.md`
+   - layout 清單記錄在 `vibe-coding/layouts/index.md`
+   - 單一 layout 細節可記錄在 `vibe-coding/layouts/<layout-id>.md`
+   - 若使用者不清楚 layout 方向，可先提供 1 到 3 個參考網站、URL、截圖或 UI 範例，由 AI 轉成專案自己的 layout 規則
+
+7. 再決定是否繼續
    - 若目前 `milestone` 還有未完成 task，`handoff` 記錄完成後，再由使用者決定要繼續或停止
    - 若沒有作用中的 `milestone`，或 task 已全部完成，則不必強制詢問是否繼續
    - 這種情況下若有合理下一步，可以提供建議，但仍保留停止選項
 
-7. 如果不知道怎麼開始
+8. 如果不知道怎麼開始
    - 先提供這三個選項：
      - `我有明確的計畫。`
      - `我還沒有完整計畫，但我知道想做的工作項目。`
@@ -381,6 +401,15 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 - `請幫我把剛才的 feature 討論保留到 features。`
 - `請只留下這個 feature 的簡短記錄，之後再決定要討論、保留或棄用。`
 - `請查看 confirmed features，幫我提出目前優化時最值得優先考慮的方向。`
+
+### layout 與 UI contract 用
+
+- `請先幫我確認這個畫面需要哪些技術決策、UI contract 和 layout 定義。`
+- `我需要 UI/UX Designer 協助，請先提出 UI/UX 規劃方案。`
+- `我不需要設計師協助，請直接用選項引導我決定 layout。`
+- `我不確定 layout 方向，請告訴我該找哪些參考網站或截圖。`
+- `請把剛才確認的 UI 規則寫入 design-system。`
+- `請把剛才確認的畫面配置寫入 layouts。`
 
 ## 衝突處理規則
 

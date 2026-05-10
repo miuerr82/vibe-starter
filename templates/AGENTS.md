@@ -15,6 +15,8 @@
 - 預設 milestone 總表路徑為 `vibe-coding/milestones/index.md`
 - 預設 milestone tasks 目錄為 `vibe-coding/milestones/tasks/`
 - 預設 feature 討論目錄為 `vibe-coding/features/`
+- 預設 layout 設計目錄為 `vibe-coding/layouts/`
+- 預設 UI contract 檔案為 `vibe-coding/ui/design-system.md`
 
 ## 工作原則
 
@@ -27,6 +29,7 @@
 - 先 planning，再 execution，並以 `milestone` 與 `tasks in milestone` 拆分工作
 - 若存在 `vibe-coding/milestones/index.md`，應優先用它判斷目前工作順序與進度
 - 若存在 `vibe-coding/features/index.md`，優化或擴充討論時應先查看已確認的 feature，再查看短記錄與討論中項目
+- 若工作會影響產品畫面，應先查看 `vibe-coding/ui/design-system.md` 與 `vibe-coding/layouts/index.md`
 - 預設使用者為公司同仁，回覆與引導應以內部協作語境為主
 
 ## 文件與語言規則
@@ -68,6 +71,19 @@
 - 若使用者未確認保留，只在 `vibe-coding/features/index.md` 留下短記錄：`曾討論：<title>。後續要討論 / 保留 / 棄用？`
 - 已確認的 feature 可在使用者要求優化或改善專案時優先提示
 - 已確認的 feature 不可自動覆蓋 milestone `work_order`，也不可未經使用者確認就轉成正式 spec 或 milestone task
+
+## UI Contract 與 Layout
+
+- 進入 layout 或畫面實作前，應先確認是否已有相關技術決策；技術棧與框架方向應記錄在 `vibe-coding/specs/decisions.md`
+- 進入 UI contract 或 layout 定義前，應詢問使用者是否需要 UI/UX Designer 協助
+- 若使用者需要 UI/UX Designer 協助，應先用設計師角色提出 UI/UX 規劃、畫面結構、互動方式、視覺方向與元件建議，再交給使用者確認
+- 若使用者不需要 UI/UX Designer 協助，AI 可直接用選項與建議和使用者討論 layout、互動、視覺與元件細節
+- 若使用者不清楚 layout 方向，應建議使用者提供 1 到 3 個參考網站、產品、URL、截圖或 UI 範例，並詢問喜歡與不喜歡的部分
+- 已確認的跨頁 UI 規則應寫入 `vibe-coding/ui/design-system.md`
+- 已確認的 layout 應寫入 `vibe-coding/layouts/index.md`，必要時建立 `vibe-coding/layouts/<layout-id>.md`
+- layout 可包含 `overall`、`list`、`detail`、`form`、`dashboard`、`flow`、`feature_specific` 或 `component_guidance`
+- layout 是持久設計規格，不必固定隸屬於 milestone；但 milestone 或 task 可以包含定義、修改或實作 layout 的工作
+- 若畫面實作結果不符合期待，應優先修訂 layout 或 UI contract，再依修訂後規格調整實作
 
 ## 起手引導
 

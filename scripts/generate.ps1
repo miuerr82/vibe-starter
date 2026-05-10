@@ -20,6 +20,9 @@ $FileKeys = @(
   "milestone_tasks",
   "features",
   "feature_index",
+  "layouts",
+  "layout_index",
+  "ui_design_system",
   "user_flows"
 )
 
@@ -40,6 +43,9 @@ $Aliases = @(
   "tasks_readme",
   "feature_readme",
   "features_index",
+  "layout_readme",
+  "layouts_index",
+  "design_system",
   "steps"
 )
 
@@ -60,6 +66,9 @@ $MenuLabels = @(
   "Milestone tasks 說明",
   "Feature 討論說明",
   "Feature 討論索引",
+  "Layout 設計說明",
+  "Layout 索引",
+  "UI Design System",
   "步驟流程"
 )
 
@@ -129,7 +138,16 @@ function Get-CanonicalKey {
     "16" { return "feature_index" }
     "feature_index" { return "feature_index" }
     "features_index" { return "feature_index" }
-    "17" { return "user_flows" }
+    "17" { return "layouts" }
+    "layouts" { return "layouts" }
+    "layout_readme" { return "layouts" }
+    "18" { return "layout_index" }
+    "layout_index" { return "layout_index" }
+    "layouts_index" { return "layout_index" }
+    "19" { return "ui_design_system" }
+    "ui_design_system" { return "ui_design_system" }
+    "design_system" { return "ui_design_system" }
+    "20" { return "user_flows" }
     "user_flows" { return "user_flows" }
     "steps" { return "user_flows" }
     default { return $null }
@@ -156,6 +174,9 @@ function Get-TemplatePath {
     "milestone_tasks" { return (Join-Path $Script:StarterRoot "templates\vibe-coding\milestones\tasks\README.md") }
     "features" { return (Join-Path $Script:StarterRoot "templates\vibe-coding\features\README.md") }
     "feature_index" { return (Join-Path $Script:StarterRoot "templates\vibe-coding\features\index.md") }
+    "layouts" { return (Join-Path $Script:StarterRoot "templates\vibe-coding\layouts\README.md") }
+    "layout_index" { return (Join-Path $Script:StarterRoot "templates\vibe-coding\layouts\index.md") }
+    "ui_design_system" { return (Join-Path $Script:StarterRoot "templates\vibe-coding\ui\design-system.md") }
     "user_flows" { return (Join-Path $Script:StarterRoot "templates\vibe-coding\specs\user_flows.md") }
     default { Fail "不支援的文件 key：$Key" }
   }
@@ -181,6 +202,9 @@ function Get-TargetPath {
     "milestone_tasks" { return (Join-Path $Script:MilestoneTasksDir "README.md") }
     "features" { return (Join-Path $Script:FeaturesDir "README.md") }
     "feature_index" { return (Join-Path $Script:FeaturesDir "index.md") }
+    "layouts" { return (Join-Path $Script:LayoutsDir "README.md") }
+    "layout_index" { return (Join-Path $Script:LayoutsDir "index.md") }
+    "ui_design_system" { return (Join-Path $Script:UiDir "design-system.md") }
     "user_flows" { return (Join-Path $Script:SpecsDir "user_flows.md") }
     default { Fail "不支援的文件 key：$Key" }
   }
@@ -258,6 +282,8 @@ try {
   Ensure-Dir $Script:MilestonesDir
   Ensure-Dir $Script:MilestoneTasksDir
   Ensure-Dir $Script:FeaturesDir
+  Ensure-Dir $Script:LayoutsDir
+  Ensure-Dir $Script:UiDir
 
   $mode = if ($args.Count -gt 0) { [string]$args[0] } else { "" }
   $remainingArgs = if ($args.Count -gt 1) { $args[1..($args.Count - 1)] } else { @() }
@@ -282,6 +308,8 @@ try {
 
   if ($generatedSummary | Where-Object { $_ -match "features" }) {
     Write-Line "下一步建議：可查看 vibe-coding/features/index.md，整理已討論、已確認或待保留的 feature。"
+  } elseif ($generatedSummary | Where-Object { $_ -match "layouts|design-system" }) {
+    Write-Line "下一步建議：先確認技術決策與是否需要 UI/UX Designer 協助，再整理 vibe-coding/ui/design-system.md 與 vibe-coding/layouts/index.md。"
   } elseif ($generatedSummary | Where-Object { $_ -match "milestones" }) {
     Write-Line "下一步建議：先查看 vibe-coding/milestones/index.md，整理目前 milestone 與工作順序。"
   } elseif ($generatedSummary | Where-Object { $_ -match "user_flows" }) {

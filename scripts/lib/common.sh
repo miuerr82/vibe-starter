@@ -11,6 +11,8 @@ HANDOFF_DIR="${WORKSPACE_DIR}/handoff"
 MILESTONES_DIR="${WORKSPACE_DIR}/milestones"
 MILESTONE_TASKS_DIR="${MILESTONES_DIR}/tasks"
 FEATURES_DIR="${WORKSPACE_DIR}/features"
+LAYOUTS_DIR="${WORKSPACE_DIR}/layouts"
+UI_DIR="${WORKSPACE_DIR}/ui"
 
 readonly SCRIPT_DIR
 readonly STARTER_ROOT
@@ -21,6 +23,8 @@ readonly HANDOFF_DIR
 readonly MILESTONES_DIR
 readonly MILESTONE_TASKS_DIR
 readonly FEATURES_DIR
+readonly LAYOUTS_DIR
+readonly UI_DIR
 
 print_line() {
   printf '%s\n' "$1"
