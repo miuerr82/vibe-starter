@@ -114,6 +114,7 @@ Windows cmd：
 - `vibe-coding/features/` 下的 feature 討論模板
 - `vibe-coding/layouts/` 下的 layout 設計模板
 - `vibe-coding/ui/` 下的 UI contract 模板
+- `vibe-coding/prototypes/` 下的 prototype 探索與決策模板
 
 ## 這個專案的用途
 
@@ -125,7 +126,7 @@ Windows cmd：
    - 建立 `vibe-coding/.gitignore`
 
 2. `generate`
-   - 在 `vibe-coding/` 下生成 spec、handoff、milestone 與 feature 討論模板
+   - 在 `vibe-coding/` 下生成 spec、handoff、milestone、feature、layout、UI contract 與 prototype 模板
    - 協助專案快速進入 spec-driven 工作方式
 
 目前第一版聚焦在：
@@ -193,6 +194,12 @@ Windows cmd：
 - `layouts/README.md`
 - `layouts/index.md`
 - `ui/design-system.md`
+- `prototypes/README.md`
+- `prototypes/registry.yml`
+- `prototypes/_template/prototype.yml`
+- `prototypes/_template/README.md`
+- `prototypes/_template/decisions.md`
+- `prototypes/_template/notes.md`
 - 可選：`specs/user_flows.md`
 
 這些文件的模板都位於：
@@ -203,6 +210,7 @@ Windows cmd：
 - `templates/vibe-coding/features/`
 - `templates/vibe-coding/layouts/`
 - `templates/vibe-coding/ui/`
+- `templates/vibe-coding/prototypes/`
 
 ## `generate` 使用方式
 
@@ -278,7 +286,8 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 - `17` / `layouts` / `layout_readme`
 - `18` / `layout_index` / `layouts_index`
 - `19` / `ui_design_system` / `design_system`
-- `20` / `user_flows` / `steps`
+- `20` / `prototypes` / `prototype_layer`
+- `21` / `user_flows` / `steps`
 
 ## 初始化後的工作流程
 
@@ -321,7 +330,7 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
    - 若不保留完整討論，只在 `features/index.md` 留短記錄：`曾討論：<title>。後續要討論 / 保留 / 棄用？`
    - 已確認 feature 可作為優化時的優先提示，但不可自動覆蓋 milestone `work_order`
 
-6. 畫面設計先固化 UI contract 與 layout
+6. 畫面設計先固化 UI contract、layout 與 prototype
    - 進入畫面實作前，先確認相關技術決策是否已記錄在 `vibe-coding/specs/decisions.md`
    - 再詢問是否需要 UI/UX Designer 協助
    - 若需要，由 UI/UX Designer 先提出 UI/UX 規劃、互動方式、視覺方向與 layout 方案，使用者確認後再固化
@@ -329,6 +338,9 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
    - 跨頁 UI 規則記錄在 `vibe-coding/ui/design-system.md`
    - layout 清單記錄在 `vibe-coding/layouts/index.md`
    - 單一 layout 細節可記錄在 `vibe-coding/layouts/<layout-id>.md`
+   - 若文字規則不足以判斷真實視覺與 UX 行為，應建立 `vibe-coding/prototypes/` 下的 prototype
+   - prototype registry 記錄在 `vibe-coding/prototypes/registry.yml`
+   - accepted prototype 應作為畫面實作與避免 design drift 的參考依據
    - 若使用者不清楚 layout 方向，可先提供 1 到 3 個參考網站、URL、截圖或 UI 範例，由 AI 轉成專案自己的 layout 規則
 
 7. 再決定是否繼續
@@ -410,6 +422,44 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 - `我不確定 layout 方向，請告訴我該找哪些參考網站或截圖。`
 - `請把剛才確認的 UI 規則寫入 design-system。`
 - `請把剛才確認的畫面配置寫入 layouts。`
+
+### prototype 用
+
+- `這個畫面需要 prototype，請先幫我建立 prototype workflow。`
+- `請幫我把這次視覺探索整理成 exploring prototype。`
+- `請幫我整理兩個 prototype 方案，並放到 comparing 狀態。`
+- `請把這個 prototype 標記為 accepted，之後實作以它為參考。`
+- `請幫我把已棄用的 prototype 記錄原因，不要刪掉。`
+
+## Prototype Layer
+
+`prototype` 層不是拿來取代 `design-system` 或 `layouts`，而是補上「文字規則不足以描述的真實視覺行為」。
+
+- `design-system` 偏向跨頁 UI 規則與元件原則
+- `layouts` 偏向持久的畫面結構與配置規格
+- `prototypes` 偏向視覺探索、方案比較、驗證與決策追蹤
+
+### 狀態
+
+- `exploring`: 早期探索，可快速迭代，不要求完整
+- `comparing`: 多個方案正在比較
+- `accepted`: 已接受，作為實作參考
+- `implemented`: 已落地到真實系統
+- `deprecated`: 不再建議使用，但保留歷史與拒絕原因
+
+### 工作方式
+
+- prototype 預設放在 `vibe-coding/prototypes/`
+- registry 放在 `vibe-coding/prototypes/registry.yml`
+- 單一 prototype 應至少包含 `prototype.yml`、`README.md`、`decisions.md`、`notes.md`
+- accepted prototype 應搭配 `design-system.md` 與相關 layout 一起作為實作依據
+- deprecated prototype 不應直接刪除，應保留拒絕或替代原因
+
+### AI 生成指引
+
+- AI 可以協助生成 prototype，但預設應先歸類為 `exploring` 或 `comparing`
+- 在使用者明確確認前，AI 不可把實驗型 prototype 當成正式實作依據
+- 若 prototype 已被接受，後續畫面實作應優先比對 accepted prototype，避免 design drift
 
 ## 衝突處理規則
 

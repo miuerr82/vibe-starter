@@ -40,6 +40,8 @@ Before making substantive changes to starter behavior, read the relevant source-
 * Keep generated milestone guidance consistent across `templates/AGENTS.md`, `templates/vibe-coding/milestones/`, README, and all `generate` launchers
 * Reusable feature discussion support belongs under `vibe-coding/features/` in generated product projects
 * Keep generated feature guidance consistent across `templates/AGENTS.md`, `templates/vibe-coding/features/`, README, and all `generate` launchers
+* Reusable prototype exploration support belongs under `vibe-coding/prototypes/` in generated product projects
+* Keep generated prototype guidance consistent across `templates/AGENTS.md`, `templates/vibe-coding/prototypes/`, README, and all `generate` launchers
 * Treat human-maintained docs, specs, templates, and handoff files as Chinese-first unless the project explicitly requires another language
 * Assume the primary users are internal company colleagues unless the repository root spec says otherwise
 * Make focused incremental edits instead of broad rewrites
@@ -88,7 +90,7 @@ When implementing features:
 4. Judge whether the change affects generated behavior, generated files, launcher parity, rules, states, or object responsibility
 5. If it is a technical-only small change with no generated behavior change, implementation may proceed directly after consistency checks
 6. If it affects generated behavior, add or confirm the minimum necessary root spec first, then validate consistency
-7. Implement focused changes across every affected launcher and template
+7. Implement focused changes across every affected launcher and template, including prototype-layer structure when the change affects visual exploration workflow
 8. Validate shell launchers and generated output where possible
 
 ---

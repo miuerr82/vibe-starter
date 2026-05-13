@@ -1,0 +1,4 @@
+# Prototype Registry
+# 用來追蹤 prototype 狀態、路徑、相關 design/spec 與決策摘要。
+
+prototypes: []

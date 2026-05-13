@@ -1,0 +1,46 @@
+id:
+
+title:
+
+status: exploring
+
+purpose:
+  - validate visual hierarchy
+  - validate navigation flow
+  - validate information density
+
+based_on:
+  design:
+    -
+  spec:
+    -
+  previous_prototype:
+    -
+
+decisions:
+  accepted:
+    -
+  pending:
+    -
+  rejected:
+    -
+
+implementation_status:
+  frontend: not-started
+  backend: not-required
+
+validation_focus:
+  - readability
+  - spacing
+  - interaction flow
+  - layout consistency
+
+tags:
+  -
+
+owner:
+  -
+
+created_at:
+
+updated_at:

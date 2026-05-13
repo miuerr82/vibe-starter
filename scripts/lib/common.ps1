@@ -19,6 +19,7 @@ $Script:MilestoneTasksDir = Join-Path $Script:MilestonesDir "tasks"
 $Script:FeaturesDir = Join-Path $Script:WorkspaceDir "features"
 $Script:LayoutsDir = Join-Path $Script:WorkspaceDir "layouts"
 $Script:UiDir = Join-Path $Script:WorkspaceDir "ui"
+$Script:PrototypesDir = Join-Path $Script:WorkspaceDir "prototypes"
 
 function Write-Line {
   param(

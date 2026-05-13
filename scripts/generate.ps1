@@ -23,6 +23,7 @@ $FileKeys = @(
   "layouts",
   "layout_index",
   "ui_design_system",
+  "prototypes",
   "user_flows"
 )
 
@@ -46,6 +47,7 @@ $Aliases = @(
   "layout_readme",
   "layouts_index",
   "design_system",
+  "prototype_layer",
   "steps"
 )
 
@@ -69,6 +71,7 @@ $MenuLabels = @(
   "Layout 設計說明",
   "Layout 索引",
   "UI Design System",
+  "Prototype 層",
   "步驟流程"
 )
 
@@ -147,7 +150,10 @@ function Get-CanonicalKey {
     "19" { return "ui_design_system" }
     "ui_design_system" { return "ui_design_system" }
     "design_system" { return "ui_design_system" }
-    "20" { return "user_flows" }
+    "20" { return "prototypes" }
+    "prototypes" { return "prototypes" }
+    "prototype_layer" { return "prototypes" }
+    "21" { return "user_flows" }
     "user_flows" { return "user_flows" }
     "steps" { return "user_flows" }
     default { return $null }
@@ -208,6 +214,50 @@ function Get-TargetPath {
     "user_flows" { return (Join-Path $Script:SpecsDir "user_flows.md") }
     default { Fail "不支援的文件 key：$Key" }
   }
+}
+
+function New-PrototypeWorkspaceOutputs {
+  $files = @(
+    @{
+      Source = Join-Path $Script:StarterRoot "templates\vibe-coding\prototypes\README.md"
+      Target = Join-Path $Script:PrototypesDir "README.md"
+    },
+    @{
+      Source = Join-Path $Script:StarterRoot "templates\vibe-coding\prototypes\registry.yml"
+      Target = Join-Path $Script:PrototypesDir "registry.yml"
+    },
+    @{
+      Source = Join-Path $Script:StarterRoot "templates\vibe-coding\prototypes\_template\prototype.yml"
+      Target = Join-Path $Script:PrototypesDir "_template\prototype.yml"
+    },
+    @{
+      Source = Join-Path $Script:StarterRoot "templates\vibe-coding\prototypes\_template\README.md"
+      Target = Join-Path $Script:PrototypesDir "_template\README.md"
+    },
+    @{
+      Source = Join-Path $Script:StarterRoot "templates\vibe-coding\prototypes\_template\decisions.md"
+      Target = Join-Path $Script:PrototypesDir "_template\decisions.md"
+    },
+    @{
+      Source = Join-Path $Script:StarterRoot "templates\vibe-coding\prototypes\_template\notes.md"
+      Target = Join-Path $Script:PrototypesDir "_template\notes.md"
+    }
+  )
+
+  Ensure-Dir $Script:PrototypesDir
+  Ensure-Dir (Join-Path $Script:PrototypesDir "_template")
+  Ensure-Dir (Join-Path $Script:PrototypesDir "exploring")
+  Ensure-Dir (Join-Path $Script:PrototypesDir "comparing")
+  Ensure-Dir (Join-Path $Script:PrototypesDir "accepted")
+  Ensure-Dir (Join-Path $Script:PrototypesDir "implemented")
+  Ensure-Dir (Join-Path $Script:PrototypesDir "deprecated")
+
+  $summaries = @()
+  foreach ($file in $files) {
+    $summaries += Copy-TemplateWithConflictPolicy -SourcePath $file.Source -TargetPath $file.Target
+  }
+
+  return $summaries
 }
 
 function Show-AvailableFiles {
@@ -284,6 +334,13 @@ try {
   Ensure-Dir $Script:FeaturesDir
   Ensure-Dir $Script:LayoutsDir
   Ensure-Dir $Script:UiDir
+  Ensure-Dir $Script:PrototypesDir
+  Ensure-Dir (Join-Path $Script:PrototypesDir "_template")
+  Ensure-Dir (Join-Path $Script:PrototypesDir "exploring")
+  Ensure-Dir (Join-Path $Script:PrototypesDir "comparing")
+  Ensure-Dir (Join-Path $Script:PrototypesDir "accepted")
+  Ensure-Dir (Join-Path $Script:PrototypesDir "implemented")
+  Ensure-Dir (Join-Path $Script:PrototypesDir "deprecated")
 
   $mode = if ($args.Count -gt 0) { [string]$args[0] } else { "" }
   $remainingArgs = if ($args.Count -gt 1) { $args[1..($args.Count - 1)] } else { @() }
@@ -299,6 +356,11 @@ try {
       Fail "不支援的文件 key / 別名 / 編號：$requested"
     }
 
+    if ($key -eq "prototypes") {
+      $generatedSummary += New-PrototypeWorkspaceOutputs
+      continue
+    }
+
     $generatedSummary += Copy-TemplateWithConflictPolicy `
       -SourcePath (Get-TemplatePath $key) `
       -TargetPath (Get-TargetPath $key)
@@ -308,6 +370,8 @@ try {
 
   if ($generatedSummary | Where-Object { $_ -match "features" }) {
     Write-Line "下一步建議：可查看 vibe-coding/features/index.md，整理已討論、已確認或待保留的 feature。"
+  } elseif ($generatedSummary | Where-Object { $_ -match "prototypes" }) {
+    Write-Line "下一步建議：先查看 vibe-coding/prototypes/README.md 與 registry.yml，建立 exploring prototype，並在接受前明確區分 experimental 與 accepted。"
   } elseif ($generatedSummary | Where-Object { $_ -match "layouts|design-system" }) {
     Write-Line "下一步建議：先確認技術決策與是否需要 UI/UX Designer 協助，再整理 vibe-coding/ui/design-system.md 與 vibe-coding/layouts/index.md。"
   } elseif ($generatedSummary | Where-Object { $_ -match "milestones" }) {

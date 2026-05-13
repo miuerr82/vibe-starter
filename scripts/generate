@@ -26,6 +26,7 @@ FILE_KEYS=(
   "layouts"
   "layout_index"
   "ui_design_system"
+  "prototypes"
   "user_flows"
 )
 
@@ -49,6 +50,7 @@ ALIASES=(
   "layout_readme"
   "layouts_index"
   "design_system"
+  "prototype_layer"
   "steps"
 )
 
@@ -72,6 +74,7 @@ MENU_LABELS=(
   "Layout 設計說明"
   "Layout 索引"
   "UI Design System"
+  "Prototype 層"
   "步驟流程"
 )
 
@@ -105,7 +108,8 @@ canonical_key() {
     17|layouts|layout_readme) print_line "layouts" ;;
     18|layout_index|layouts_index) print_line "layout_index" ;;
     19|ui_design_system|design_system) print_line "ui_design_system" ;;
-    20|user_flows|steps) print_line "user_flows" ;;
+    20|prototypes|prototype_layer) print_line "prototypes" ;;
+    21|user_flows|steps) print_line "user_flows" ;;
     *) return 1 ;;
   esac
 }
@@ -160,6 +164,33 @@ target_path_for() {
     user_flows) print_line "${SPECS_DIR}/user_flows.md" ;;
     *) return 1 ;;
   esac
+}
+
+generate_prototype_workspace() {
+  local files=(
+    "${STARTER_ROOT}/templates/vibe-coding/prototypes/README.md|${PROTOTYPES_DIR}/README.md"
+    "${STARTER_ROOT}/templates/vibe-coding/prototypes/registry.yml|${PROTOTYPES_DIR}/registry.yml"
+    "${STARTER_ROOT}/templates/vibe-coding/prototypes/_template/prototype.yml|${PROTOTYPES_DIR}/_template/prototype.yml"
+    "${STARTER_ROOT}/templates/vibe-coding/prototypes/_template/README.md|${PROTOTYPES_DIR}/_template/README.md"
+    "${STARTER_ROOT}/templates/vibe-coding/prototypes/_template/decisions.md|${PROTOTYPES_DIR}/_template/decisions.md"
+    "${STARTER_ROOT}/templates/vibe-coding/prototypes/_template/notes.md|${PROTOTYPES_DIR}/_template/notes.md"
+  )
+  local mapping source_path target_path summary
+
+  ensure_dir "${PROTOTYPES_DIR}"
+  ensure_dir "${PROTOTYPES_DIR}/_template"
+  ensure_dir "${PROTOTYPES_DIR}/exploring"
+  ensure_dir "${PROTOTYPES_DIR}/comparing"
+  ensure_dir "${PROTOTYPES_DIR}/accepted"
+  ensure_dir "${PROTOTYPES_DIR}/implemented"
+  ensure_dir "${PROTOTYPES_DIR}/deprecated"
+
+  for mapping in "${files[@]}"; do
+    source_path="${mapping%%|*}"
+    target_path="${mapping#*|}"
+    copy_template_with_conflict_policy "${source_path}" "${target_path}" summary
+    GENERATED_SUMMARY+=("${summary}")
+  done
 }
 
 list_available_files() {
@@ -239,6 +270,12 @@ run_generation() {
 
   validate_key "${requested_key}" || fail "不支援的文件 key / 別名 / 編號：${requested_key}"
   key="$(canonical_key "${requested_key}")"
+
+  if [[ "${key}" == "prototypes" ]]; then
+    generate_prototype_workspace
+    return 0
+  fi
+
   source_path="$(template_path_for "${key}")"
   target_path="$(target_path_for "${key}")"
 
@@ -260,6 +297,13 @@ main() {
   ensure_dir "${FEATURES_DIR}"
   ensure_dir "${LAYOUTS_DIR}"
   ensure_dir "${UI_DIR}"
+  ensure_dir "${PROTOTYPES_DIR}"
+  ensure_dir "${PROTOTYPES_DIR}/_template"
+  ensure_dir "${PROTOTYPES_DIR}/exploring"
+  ensure_dir "${PROTOTYPES_DIR}/comparing"
+  ensure_dir "${PROTOTYPES_DIR}/accepted"
+  ensure_dir "${PROTOTYPES_DIR}/implemented"
+  ensure_dir "${PROTOTYPES_DIR}/deprecated"
 
   while IFS= read -r selected; do
     [[ -n "${selected}" ]] || continue
@@ -270,6 +314,8 @@ main() {
 
   if printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'features'; then
     print_line "下一步建議：可查看 vibe-coding/features/index.md，整理已討論、已確認或待保留的 feature。"
+  elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'prototypes'; then
+    print_line "下一步建議：先查看 vibe-coding/prototypes/README.md 與 registry.yml，建立 exploring prototype，並在接受前明確區分 experimental 與 accepted。"
   elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'layouts\|design-system'; then
     print_line "下一步建議：先確認技術決策與是否需要 UI/UX Designer 協助，再整理 vibe-coding/ui/design-system.md 與 vibe-coding/layouts/index.md。"
   elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'milestones'; then

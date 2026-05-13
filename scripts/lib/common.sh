@@ -13,6 +13,7 @@ MILESTONE_TASKS_DIR="${MILESTONES_DIR}/tasks"
 FEATURES_DIR="${WORKSPACE_DIR}/features"
 LAYOUTS_DIR="${WORKSPACE_DIR}/layouts"
 UI_DIR="${WORKSPACE_DIR}/ui"
+PROTOTYPES_DIR="${WORKSPACE_DIR}/prototypes"
 
 readonly SCRIPT_DIR
 readonly STARTER_ROOT
@@ -25,6 +26,7 @@ readonly MILESTONE_TASKS_DIR
 readonly FEATURES_DIR
 readonly LAYOUTS_DIR
 readonly UI_DIR
+readonly PROTOTYPES_DIR
 
 print_line() {
   printf '%s\n' "$1"

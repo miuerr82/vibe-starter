@@ -17,6 +17,7 @@
 - 預設 feature 討論目錄為 `vibe-coding/features/`
 - 預設 layout 設計目錄為 `vibe-coding/layouts/`
 - 預設 UI contract 檔案為 `vibe-coding/ui/design-system.md`
+- 預設 prototype 工作目錄為 `vibe-coding/prototypes/`
 
 ## 工作原則
 
@@ -30,6 +31,7 @@
 - 若存在 `vibe-coding/milestones/index.md`，應優先用它判斷目前工作順序與進度
 - 若存在 `vibe-coding/features/index.md`，優化或擴充討論時應先查看已確認的 feature，再查看短記錄與討論中項目
 - 若工作會影響產品畫面，應先查看 `vibe-coding/ui/design-system.md` 與 `vibe-coding/layouts/index.md`
+- 若工作會影響產品畫面且已有 prototype，應再查看 `vibe-coding/prototypes/registry.yml` 與相關 accepted prototype
 - 預設使用者為公司同仁，回覆與引導應以內部協作語境為主
 
 ## 文件與語言規則
@@ -84,6 +86,18 @@
 - layout 可包含 `overall`、`list`、`detail`、`form`、`dashboard`、`flow`、`feature_specific` 或 `component_guidance`
 - layout 是持久設計規格，不必固定隸屬於 milestone；但 milestone 或 task 可以包含定義、修改或實作 layout 的工作
 - 若畫面實作結果不符合期待，應優先修訂 layout 或 UI contract，再依修訂後規格調整實作
+
+## Prototype
+
+- prototype 是視覺探索、比較、驗證與決策追蹤層，不取代 design-system 或 layout
+- prototype 預設放在 `vibe-coding/prototypes/`
+- design layer 用來固化跨頁 UI 規則與持久 layout 原則；prototype layer 用來記錄實際視覺行為、變體比較與接受理由
+- prototype 可不完整，也可刻意忽略 backend；重點是快速得到可判斷的視覺與 UX 反饋
+- prototype 狀態固定值為 `exploring`、`comparing`、`accepted`、`implemented`、`deprecated`
+- 若需要 AI 協助生成 prototype，應先放在 `exploring/` 或 `comparing/`，不可直接視為正式實作依據
+- prototype registry 應記錄在 `vibe-coding/prototypes/registry.yml`
+- accepted prototype 應作為畫面實作與防止 design drift 的參考依據
+- deprecated prototype 應保留棄用或被取代原因，避免重複走回已否決方向
 
 ## 起手引導
 
