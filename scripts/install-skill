@@ -1,0 +1,232 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source "$(cd "$(dirname "$0")" && pwd)/lib/common.sh"
+
+CLAUDE_DIR="${PROJECT_ROOT}/.claude"
+CLAUDE_SKILLS_DIR="${CLAUDE_DIR}/skills"
+
+SKILL_KEYS=(
+  "spec-driven-consultant"
+  "vibe-uiux-designer"
+  "vibe-project-manager"
+)
+
+ALIASES=(
+  "spec"
+  "uiux"
+  "pm"
+)
+
+MENU_LABELS=(
+  "Spec-driven 需求顧問"
+  "UI/UX Designer"
+  "Project Manager"
+)
+
+declare -a INSTALL_SUMMARY=()
+
+canonical_mode() {
+  case "$1" in
+    1|single) print_line "single" ;;
+    2|multiple) print_line "multiple" ;;
+    3|all) print_line "all" ;;
+    *) return 1 ;;
+  esac
+}
+
+canonical_skill() {
+  case "$1" in
+    1|spec-driven-consultant|spec) print_line "spec-driven-consultant" ;;
+    2|vibe-uiux-designer|uiux) print_line "vibe-uiux-designer" ;;
+    3|vibe-project-manager|pm) print_line "vibe-project-manager" ;;
+    *) return 1 ;;
+  esac
+}
+
+template_dir_for() {
+  print_line "${STARTER_ROOT}/templates/claude/skills/$1"
+}
+
+target_dir_for() {
+  print_line "${CLAUDE_SKILLS_DIR}/$1"
+}
+
+list_available_skills() {
+  local i=0
+  print_line "可安裝的 Claude skills 如下：" >&2
+  for key in "${SKILL_KEYS[@]}"; do
+    print_line "- $((i + 1)). ${key} (${MENU_LABELS[$i]})，別名：${ALIASES[$i]}" >&2
+    i=$((i + 1))
+  done
+}
+
+list_available_modes() {
+  print_line "請選擇要安裝的 Claude skills：" >&2
+  print_line "- 1. 單一" >&2
+  print_line "- 2. 多個" >&2
+  print_line "- 3. 全部" >&2
+}
+
+collect_targets() {
+  local mode="${1:-}"
+  local selected=""
+  local selected_line=""
+  local selected_mode=""
+  shift || true
+
+  if [[ -n "${mode}" ]]; then
+    mode="$(canonical_mode "${mode}" 2>/dev/null || print_line "${mode}")"
+  fi
+
+  case "${mode}" in
+    all)
+      printf '%s\n' "${SKILL_KEYS[@]}"
+      return 0
+      ;;
+    single)
+      if [[ $# -eq 0 ]]; then
+        list_available_skills
+        read -r -p "請輸入單一 skill 編號（也可輸入 key / 別名）: " selected
+        printf '%s\n' "${selected}"
+      else
+        printf '%s\n' "$1"
+      fi
+      return 0
+      ;;
+    multiple)
+      if [[ $# -eq 0 ]]; then
+        list_available_skills
+        read -r -p "請輸入多個 skill 編號，請用空白分隔（也可混用 key / 別名）: " selected_line
+        for key in ${selected_line}; do
+          printf '%s\n' "${key}"
+        done
+      else
+        printf '%s\n' "$@"
+      fi
+      return 0
+      ;;
+    "")
+      list_available_modes
+      read -r -p "請輸入模式編號 [1/2/3]: " selected_mode
+      collect_targets "${selected_mode}"
+      return 0
+      ;;
+    *)
+      fail "不支援的 skill 安裝模式：${mode}"
+      ;;
+  esac
+}
+
+validate_skill() {
+  canonical_skill "$1" >/dev/null
+}
+
+validate_directory_name() {
+  local name="$1"
+  [[ -n "${name}" ]] || return 1
+  [[ "${name}" != *"/"* ]] || return 1
+  [[ "${name}" != *"\\"* ]] || return 1
+  [[ "${name}" != "." && "${name}" != ".." ]] || return 1
+}
+
+copy_skill_template() {
+  local source_dir="$1"
+  local target_dir="$2"
+
+  ensure_dir "${target_dir}"
+  shopt -s dotglob nullglob
+  local entry
+  for entry in "${source_dir}"/*; do
+    [[ "$(basename "${entry}")" != ".gitkeep" ]] || continue
+    cp -R "${entry}" "${target_dir}/"
+  done
+  shopt -u dotglob nullglob
+}
+
+install_skill() {
+  local requested_skill="$1"
+  local skill=""
+  local source_dir=""
+  local target_dir=""
+  local alt_name=""
+  local alt_dir=""
+
+  validate_skill "${requested_skill}" || fail "不支援的 skill key / 別名 / 編號：${requested_skill}"
+  skill="$(canonical_skill "${requested_skill}")"
+  source_dir="$(template_dir_for "${skill}")"
+  target_dir="$(target_dir_for "${skill}")"
+
+  [[ -f "${source_dir}/SKILL.md" ]] || fail "找不到 skill template：${source_dir}/SKILL.md"
+
+  if [[ -e "${target_dir}" ]]; then
+    print_line "Skill 目錄已存在，是否覆寫？"
+    if prompt_yes_no "> ${target_dir}"; then
+      copy_skill_template "${source_dir}" "${target_dir}"
+      INSTALL_SUMMARY+=("覆寫: ${target_dir}")
+      return 0
+    fi
+
+    while true; do
+      local choice
+      if ! read -r -p "若不覆寫，請選擇：提供其他目錄名 / 略過 [rename/skip]: " choice; then
+        INSTALL_SUMMARY+=("略過: ${target_dir}")
+        return 0
+      fi
+      case "${choice}" in
+        rename)
+          if ! read -r -p "請提供其他 skill 目錄名（預設保留在 ${CLAUDE_SKILLS_DIR}/ 下）: " alt_name; then
+            INSTALL_SUMMARY+=("略過: ${target_dir}")
+            return 0
+          fi
+          validate_directory_name "${alt_name}" || {
+            print_line "目錄名不可為空，且不可包含 / 或 \\。"
+            continue
+          }
+          alt_dir="${CLAUDE_SKILLS_DIR}/${alt_name}"
+          if [[ -e "${alt_dir}" ]]; then
+            print_line "目錄已存在：${alt_dir}"
+            continue
+          fi
+          copy_skill_template "${source_dir}" "${alt_dir}"
+          INSTALL_SUMMARY+=("改名: ${alt_dir}")
+          return 0
+          ;;
+        skip)
+          INSTALL_SUMMARY+=("略過: ${target_dir}")
+          return 0
+          ;;
+        *)
+          print_line "請輸入 rename 或 skip。"
+          ;;
+      esac
+    done
+  fi
+
+  copy_skill_template "${source_dir}" "${target_dir}"
+  INSTALL_SUMMARY+=("建立: ${target_dir}")
+}
+
+main() {
+  local mode="${1:-}"
+  shift || true
+  local selected
+  local selected_targets=()
+
+  ensure_project_root
+  ensure_dir "${CLAUDE_DIR}"
+  ensure_dir "${CLAUDE_SKILLS_DIR}"
+
+  mapfile -t selected_targets < <(collect_targets "${mode}" "$@")
+
+  for selected in "${selected_targets[@]}"; do
+    [[ -n "${selected}" ]] || continue
+    install_skill "${selected}"
+  done
+
+  print_summary "Claude skills 安裝完成。已建立、覆寫、略過的項目如下。" "${INSTALL_SUMMARY[@]}"
+  print_line "安裝位置：.claude/skills/"
+}
+
+main "$@"

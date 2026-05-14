@@ -323,10 +323,10 @@ main() {
   elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'user_flows'; then
     print_line "下一步建議：可請 AI 依 user_flows.md 協助補入 behaviors.md 與 flows.md。"
   else
-    print_line "下一步建議：先補 0_project.md、glossary.md、roles.md。"
+    print_line "下一步建議：可以先從討論專案目標開始，逐步讓AI助理協助進行您的專案工作。"
   fi
 
-  print_line "目前已有可交接內容，是否要我整理 handoff？"
+  print_line "若使用 Claude，可執行 install-skill 安裝 project-level skills。"
 }
 
 main "$@"
