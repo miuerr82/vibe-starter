@@ -379,10 +379,10 @@ try {
   } elseif ($generatedSummary | Where-Object { $_ -match "user_flows" }) {
     Write-Line "下一步建議：可請 AI 依 user_flows.md 協助補入 behaviors.md 與 flows.md。"
   } else {
-    Write-Line "下一步建議：先補 0_project.md、glossary.md、roles.md。"
+    Write-Line "下一步建議：可以先從討論專案目標開始，逐步讓AI助理協助進行您的專案工作。"
   }
 
-  Write-Line "目前已有可交接內容，是否要我整理 handoff？"
+  Write-Line "若使用 Claude，可執行 install-skill 安裝 project-level skills。"
 } catch {
   [Console]::Error.WriteLine($_.Exception.Message)
   exit 1
