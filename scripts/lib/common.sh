@@ -14,6 +14,9 @@ FEATURES_DIR="${WORKSPACE_DIR}/features"
 LAYOUTS_DIR="${WORKSPACE_DIR}/layouts"
 UI_DIR="${WORKSPACE_DIR}/ui"
 PROTOTYPES_DIR="${WORKSPACE_DIR}/prototypes"
+REPORTS_DIR="${PROJECT_ROOT}/reports"
+REPORT_DATA_DIR="${REPORTS_DIR}/data"
+REPORT_HTML_DIR="${REPORTS_DIR}/html"
 
 readonly SCRIPT_DIR
 readonly STARTER_ROOT
@@ -27,6 +30,9 @@ readonly FEATURES_DIR
 readonly LAYOUTS_DIR
 readonly UI_DIR
 readonly PROTOTYPES_DIR
+readonly REPORTS_DIR
+readonly REPORT_DATA_DIR
+readonly REPORT_HTML_DIR
 
 print_line() {
   printf '%s\n' "$1"

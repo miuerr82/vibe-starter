@@ -1,0 +1,28 @@
+summarized_at:
+
+project:
+  name:
+  goal:
+  current_status:
+  current_milestone:
+  updated_at:
+
+context_view:
+  active_discussions: []
+  observations: []
+  future_options: []
+  pending_decisions: []
+
+execution_view:
+  milestones: []
+  tasks: []
+  validations: []
+  handoffs: []
+
+risk_view:
+  risks: []
+
+activity_view:
+  agent_activity: []
+  human_activity: []
+
