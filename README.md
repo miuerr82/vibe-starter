@@ -115,6 +115,7 @@ Windows cmd：
 - `vibe-coding/layouts/` 下的 layout 設計模板
 - `vibe-coding/ui/` 下的 UI contract 模板
 - `vibe-coding/prototypes/` 下的 prototype 探索與決策模板
+- `reports/` 下的 project report source 與 HTML dashboard 模板
 
 ## 這個專案的用途
 
@@ -127,7 +128,13 @@ Windows cmd：
 
 2. `generate`
    - 在 `vibe-coding/` 下生成 spec、handoff、milestone、feature、layout、UI contract 與 prototype 模板
+   - 在 `reports/` 下生成 project report source 與 dashboard 模板
    - 協助專案快速進入 spec-driven 工作方式
+
+3. `report`
+   - 讀取 `reports/data/project-state.yml` 與 `reports/current-status.md`
+   - 產生固定格式的單檔 HTML dashboard：`reports/html/index.html`
+   - 可用 `--open` 嘗試開啟 dashboard；在 WSL 會優先嘗試 `wslview`、`explorer.exe`、`xdg-open`
 
 目前第一版聚焦在：
 
@@ -200,6 +207,9 @@ Windows cmd：
 - `prototypes/_template/README.md`
 - `prototypes/_template/decisions.md`
 - `prototypes/_template/notes.md`
+- `reports/data/project-state.yml`
+- `reports/current-status.md`
+- `reports/html/index.html`
 - 可選：`specs/user_flows.md`
 
 這些文件的模板都位於：
@@ -211,6 +221,7 @@ Windows cmd：
 - `templates/vibe-coding/layouts/`
 - `templates/vibe-coding/ui/`
 - `templates/vibe-coding/prototypes/`
+- `templates/reports/`
 
 ## `generate` 使用方式
 
@@ -234,6 +245,7 @@ bash ./vibe-coding/vibe-starter/scripts/generate
 bash ./vibe-coding/vibe-starter/scripts/generate single 1
 bash ./vibe-coding/vibe-starter/scripts/generate single project
 bash ./vibe-coding/vibe-starter/scripts/generate multiple 2 role object
+bash ./vibe-coding/vibe-starter/scripts/generate single reports
 bash ./vibe-coding/vibe-starter/scripts/generate all
 ```
 
@@ -241,6 +253,7 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 .\vibe-coding\vibe-starter\scripts\generate.ps1 single 1
 .\vibe-coding\vibe-starter\scripts\generate.ps1 single project
 .\vibe-coding\vibe-starter\scripts\generate.ps1 multiple 2 role object
+.\vibe-coding\vibe-starter\scripts\generate.ps1 single reports
 .\vibe-coding\vibe-starter\scripts\generate.ps1 all
 ```
 
@@ -248,6 +261,7 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 .\vibe-coding\vibe-starter\scripts\generate.cmd single 1
 .\vibe-coding\vibe-starter\scripts\generate.cmd single project
 .\vibe-coding\vibe-starter\scripts\generate.cmd multiple 2 role object
+.\vibe-coding\vibe-starter\scripts\generate.cmd single reports
 .\vibe-coding\vibe-starter\scripts\generate.cmd all
 ```
 
@@ -287,7 +301,71 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 - `18` / `layout_index` / `layouts_index`
 - `19` / `ui_design_system` / `design_system`
 - `20` / `prototypes` / `prototype_layer`
-- `21` / `user_flows` / `steps`
+- `21` / `reports` / `report_layer`
+- `22` / `user_flows` / `steps`
+
+## `report` 使用方式
+
+Project report 是需要查看專案狀態時才整理的 snapshot，不會每次 AI 回覆都自動更新。
+
+`report` 指令只負責把現有 `reports/data/project-state.yml` 與 `reports/current-status.md` 轉成 HTML dashboard；它不會自動理解專案內容，也不會自動更新 YAML / Markdown source。專案狀態整理仍由 AI 或人先完成。
+
+建議日常用法是在 CLI 中要求 AI：
+
+```text
+請讀取 AGENTS.md 並依內容執行；指令：專案報告。
+```
+
+AI 應整理：
+
+- `reports/data/project-state.yml`
+- `reports/current-status.md`
+
+然後執行：
+
+```bash
+bash ./vibe-coding/vibe-starter/scripts/report --open
+```
+
+若只要重新產生 HTML，也可以直接從產品專案根目錄執行：
+
+```bash
+bash ./vibe-coding/vibe-starter/scripts/report
+bash ./vibe-coding/vibe-starter/scripts/report --open
+```
+
+```powershell
+.\vibe-coding\vibe-starter\scripts\report.ps1
+.\vibe-coding\vibe-starter\scripts\report.ps1 --open
+```
+
+```cmd
+.\vibe-coding\vibe-starter\scripts\report.cmd
+.\vibe-coding\vibe-starter\scripts\report.cmd --open
+```
+
+`scripts/report` 目前需要 `python3` 來產生 HTML；Windows 可使用 `report.ps1` 或 `report.cmd`，不需要 `python3`。
+
+若使用 `--open` 但環境無法自動開啟瀏覽器，只要 `reports/html/index.html` 成功產生，就視為完成。
+
+Report dashboard 會產生在：
+
+```text
+reports/html/index.html
+```
+
+Dashboard 會顯示兩個時間：
+
+- `source_summarized_at`：AI / 人整理 report source 的時間
+- `generated_at`：HTML dashboard 產生時間
+
+HTML 是靜態 snapshot。若專案狀態之後改變，請重新使用 `指令：專案報告` 或再次執行 `scripts/report`。
+
+若要 commit report files，請確認：
+
+- `reports/data/project-state.yml` 或 `reports/current-status.md` 有明確的彙整時間
+- `reports/html/index.html` 顯示 `source_summarized_at`
+- `reports/html/index.html` 顯示 `generated_at`
 
 ## 初始化後的工作流程
 
@@ -431,6 +509,109 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 - `請把這個 prototype 標記為 accepted，之後實作以它為參考。`
 - `請幫我把已棄用的 prototype 記錄原因，不要刪掉。`
 
+## Milestone Layer
+
+Milestone layer 用來記錄已決定要執行的工作，不用來收納所有想法。
+
+- milestone 總表放在 `vibe-coding/milestones/index.md`
+- task 詳細內容放在 `vibe-coding/milestones/tasks/<milestone-id>.md`
+- `work_order` 是明確工作順序
+- `priority` 是重要性提示，不可覆蓋 `work_order`
+- `ignored` 表示暫時不納入下一步建議，但仍保留記錄
+- `blocked` 表示目前想做但被依賴或阻塞卡住
+- `manual_pending_task_refs` 只記錄使用者手動 pending 的商業決策項，不由 AI 自動推導
+- `task_status_summary` 應由對應 tasks file 摘要而來，不取代 tasks file
+- `actual_duration` 記錄實際工作時間，格式為 `00h:00m`
+- `elapsed_calendar_duration` 記錄跨日經過時間，以天為單位並保留小數點兩位
+
+建議流程：
+
+1. 先決定 milestone 是否真的要執行
+2. 再建立 milestone entry
+3. 再建立對應 tasks file
+4. 執行中同步 task 狀態與 milestone 總表
+5. 完成或暫停後視情況整理 handoff 或 project report
+
+## Feature Discussion Layer
+
+Feature discussion layer 用來保存還沒正式進入 spec 或 milestone 的想法、討論與決策脈絡。
+
+- feature 討論預設放在 `vibe-coding/features/`
+- feature index 放在 `vibe-coding/features/index.md`
+- 單一 feature 討論可放在 `vibe-coding/features/<feature-id>.md`
+- feature 不可未經使用者確認就轉成正式 spec
+- feature 不可未經使用者確認就轉成 milestone task
+- confirmed feature 可在優化或改善討論時優先提示，但不可覆蓋 milestone `work_order`
+
+常見狀態：
+
+- `confirmed`: 已確認為未來優先方向
+- `discussing`: 正在討論
+- `brief_note`: 只保留短記錄
+- `preserved`: 保留完整討論但尚未執行
+- `accepted_for_spec`: 準備轉成正式 spec
+- `deferred`: 保留但暫不處理
+- `rejected`: 已棄用或不追求
+
+可暫存點包含：
+
+- 已提出 feature 方向
+- 已辨識問題或使用者意圖
+- 已比較選項
+- 有值得回顧的 open questions
+- 即將切換主題
+- 討論暫停但尚未進入正式 spec / milestone
+
+## Design Layer
+
+Design layer 用來固化跨頁 UI 規則與持久 layout，不取代 prototype。
+
+主要檔案：
+
+- `vibe-coding/ui/design-system.md`
+- `vibe-coding/layouts/index.md`
+- `vibe-coding/layouts/<layout-id>.md`
+
+`design-system.md` 應記錄：
+
+- visual direction
+- design tokens
+- component rules
+- interaction behavior
+- state presentation
+- information architecture
+- content tone
+
+`layouts/index.md` 應記錄：
+
+- layout id
+- status
+- type
+- scope
+- related features
+- related milestones
+- related tasks
+- relevant UI contract references
+
+layout 類型可包含：
+
+- `overall`
+- `list`
+- `detail`
+- `form`
+- `dashboard`
+- `flow`
+- `feature_specific`
+- `component_guidance`
+
+工作方式：
+
+- 進入 UI contract 或 layout 前，先確認相關技術決策是否已記錄在 `vibe-coding/specs/decisions.md`
+- 進入 UI contract 或 layout 前，先詢問是否需要 UI/UX Designer 協助
+- 若需要 UI/UX Designer 協助，先產出 UI/UX 規劃，再交給使用者確認
+- 若不需要 UI/UX Designer 協助，AI 可直接用選項與建議引導 layout / interaction / visual 決策
+- 若 implementation 與設計方向不一致，應優先修訂 layout 或 design-system，再依修訂後內容調整實作
+
 ## Prototype Layer
 
 `prototype` 層不是拿來取代 `design-system` 或 `layouts`，而是補上「文字規則不足以描述的真實視覺行為」。
@@ -460,6 +641,43 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 - AI 可以協助生成 prototype，但預設應先歸類為 `exploring` 或 `comparing`
 - 在使用者明確確認前，AI 不可把實驗型 prototype 當成正式實作依據
 - 若 prototype 已被接受，後續畫面實作應優先比對 accepted prototype，避免 design drift
+
+## Claude Skills
+
+如果產品專案使用 Claude，可選擇安裝 project-level skills。
+
+安裝入口：
+
+```bash
+bash ./vibe-coding/vibe-starter/scripts/install-skill
+```
+
+```powershell
+.\vibe-coding\vibe-starter\scripts\install-skill.ps1
+```
+
+```cmd
+.\vibe-coding\vibe-starter\scripts\install-skill.cmd
+```
+
+目前 starter 提供的 Claude skill templates：
+
+- `spec-driven-consultant`
+- `vibe-uiux-designer`
+- `vibe-project-manager`
+
+安裝位置：
+
+```text
+.claude/skills/
+```
+
+注意事項：
+
+- `install-skill` 不會在 `init` 時自動執行
+- skill 安裝是 project-local，只會寫入目前產品專案的 `.claude/skills/`
+- starter 不會把 skill 安裝到使用者全域 `~/.claude/skills/`
+- 若目標 skill 目錄已存在，會詢問是否覆寫、改名或略過
 
 ## 衝突處理規則
 

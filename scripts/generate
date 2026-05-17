@@ -27,6 +27,7 @@ FILE_KEYS=(
   "layout_index"
   "ui_design_system"
   "prototypes"
+  "reports"
   "user_flows"
 )
 
@@ -51,6 +52,7 @@ ALIASES=(
   "layouts_index"
   "design_system"
   "prototype_layer"
+  "report_layer"
   "steps"
 )
 
@@ -75,6 +77,7 @@ MENU_LABELS=(
   "Layout 索引"
   "UI Design System"
   "Prototype 層"
+  "Project Report 層"
   "步驟流程"
 )
 
@@ -109,7 +112,8 @@ canonical_key() {
     18|layout_index|layouts_index) print_line "layout_index" ;;
     19|ui_design_system|design_system) print_line "ui_design_system" ;;
     20|prototypes|prototype_layer) print_line "prototypes" ;;
-    21|user_flows|steps) print_line "user_flows" ;;
+    21|reports|report_layer) print_line "reports" ;;
+    22|user_flows|steps) print_line "user_flows" ;;
     *) return 1 ;;
   esac
 }
@@ -184,6 +188,26 @@ generate_prototype_workspace() {
   ensure_dir "${PROTOTYPES_DIR}/accepted"
   ensure_dir "${PROTOTYPES_DIR}/implemented"
   ensure_dir "${PROTOTYPES_DIR}/deprecated"
+
+  for mapping in "${files[@]}"; do
+    source_path="${mapping%%|*}"
+    target_path="${mapping#*|}"
+    copy_template_with_conflict_policy "${source_path}" "${target_path}" summary
+    GENERATED_SUMMARY+=("${summary}")
+  done
+}
+
+generate_report_layer() {
+  local files=(
+    "${STARTER_ROOT}/templates/reports/data/project-state.yml|${REPORT_DATA_DIR}/project-state.yml"
+    "${STARTER_ROOT}/templates/reports/current-status.md|${REPORTS_DIR}/current-status.md"
+    "${STARTER_ROOT}/templates/reports/html/index.html|${REPORT_HTML_DIR}/index.html"
+  )
+  local mapping source_path target_path summary
+
+  ensure_dir "${REPORTS_DIR}"
+  ensure_dir "${REPORT_DATA_DIR}"
+  ensure_dir "${REPORT_HTML_DIR}"
 
   for mapping in "${files[@]}"; do
     source_path="${mapping%%|*}"
@@ -276,6 +300,11 @@ run_generation() {
     return 0
   fi
 
+  if [[ "${key}" == "reports" ]]; then
+    generate_report_layer
+    return 0
+  fi
+
   source_path="$(template_path_for "${key}")"
   target_path="$(target_path_for "${key}")"
 
@@ -304,6 +333,9 @@ main() {
   ensure_dir "${PROTOTYPES_DIR}/accepted"
   ensure_dir "${PROTOTYPES_DIR}/implemented"
   ensure_dir "${PROTOTYPES_DIR}/deprecated"
+  ensure_dir "${REPORTS_DIR}"
+  ensure_dir "${REPORT_DATA_DIR}"
+  ensure_dir "${REPORT_HTML_DIR}"
 
   while IFS= read -r selected; do
     [[ -n "${selected}" ]] || continue
@@ -316,6 +348,8 @@ main() {
     print_line "下一步建議：可查看 vibe-coding/features/index.md，整理已討論、已確認或待保留的 feature。"
   elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'prototypes'; then
     print_line "下一步建議：先查看 vibe-coding/prototypes/README.md 與 registry.yml，建立 exploring prototype，並在接受前明確區分 experimental 與 accepted。"
+  elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'reports'; then
+    print_line "下一步建議：當需要查看目前專案狀態時，請使用「指令：專案報告」，或執行 bash ./vibe-coding/vibe-starter/scripts/report --open。"
   elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'layouts\|design-system'; then
     print_line "下一步建議：先確認技術決策與是否需要 UI/UX Designer 協助，再整理 vibe-coding/ui/design-system.md 與 vibe-coding/layouts/index.md。"
   elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'milestones'; then

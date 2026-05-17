@@ -24,6 +24,7 @@ $FileKeys = @(
   "layout_index",
   "ui_design_system",
   "prototypes",
+  "reports",
   "user_flows"
 )
 
@@ -48,6 +49,7 @@ $Aliases = @(
   "layouts_index",
   "design_system",
   "prototype_layer",
+  "report_layer",
   "steps"
 )
 
@@ -72,6 +74,7 @@ $MenuLabels = @(
   "Layout 索引",
   "UI Design System",
   "Prototype 層",
+  "Project Report 層",
   "步驟流程"
 )
 
@@ -153,7 +156,10 @@ function Get-CanonicalKey {
     "20" { return "prototypes" }
     "prototypes" { return "prototypes" }
     "prototype_layer" { return "prototypes" }
-    "21" { return "user_flows" }
+    "21" { return "reports" }
+    "reports" { return "reports" }
+    "report_layer" { return "reports" }
+    "22" { return "user_flows" }
     "user_flows" { return "user_flows" }
     "steps" { return "user_flows" }
     default { return $null }
@@ -260,6 +266,34 @@ function New-PrototypeWorkspaceOutputs {
   return $summaries
 }
 
+function New-ReportLayerOutputs {
+  $files = @(
+    @{
+      Source = Join-Path $Script:StarterRoot "templates\reports\data\project-state.yml"
+      Target = Join-Path $Script:ReportDataDir "project-state.yml"
+    },
+    @{
+      Source = Join-Path $Script:StarterRoot "templates\reports\current-status.md"
+      Target = Join-Path $Script:ReportsDir "current-status.md"
+    },
+    @{
+      Source = Join-Path $Script:StarterRoot "templates\reports\html\index.html"
+      Target = Join-Path $Script:ReportHtmlDir "index.html"
+    }
+  )
+
+  Ensure-Dir $Script:ReportsDir
+  Ensure-Dir $Script:ReportDataDir
+  Ensure-Dir $Script:ReportHtmlDir
+
+  $summaries = @()
+  foreach ($file in $files) {
+    $summaries += Copy-TemplateWithConflictPolicy -SourcePath $file.Source -TargetPath $file.Target
+  }
+
+  return $summaries
+}
+
 function Show-AvailableFiles {
   [Console]::Error.WriteLine("可生成的文件如下：")
   for ($i = 0; $i -lt $FileKeys.Count; $i++) {
@@ -341,6 +375,9 @@ try {
   Ensure-Dir (Join-Path $Script:PrototypesDir "accepted")
   Ensure-Dir (Join-Path $Script:PrototypesDir "implemented")
   Ensure-Dir (Join-Path $Script:PrototypesDir "deprecated")
+  Ensure-Dir $Script:ReportsDir
+  Ensure-Dir $Script:ReportDataDir
+  Ensure-Dir $Script:ReportHtmlDir
 
   $mode = if ($args.Count -gt 0) { [string]$args[0] } else { "" }
   $remainingArgs = if ($args.Count -gt 1) { $args[1..($args.Count - 1)] } else { @() }
@@ -361,6 +398,11 @@ try {
       continue
     }
 
+    if ($key -eq "reports") {
+      $generatedSummary += New-ReportLayerOutputs
+      continue
+    }
+
     $generatedSummary += Copy-TemplateWithConflictPolicy `
       -SourcePath (Get-TemplatePath $key) `
       -TargetPath (Get-TargetPath $key)
@@ -372,6 +414,8 @@ try {
     Write-Line "下一步建議：可查看 vibe-coding/features/index.md，整理已討論、已確認或待保留的 feature。"
   } elseif ($generatedSummary | Where-Object { $_ -match "prototypes" }) {
     Write-Line "下一步建議：先查看 vibe-coding/prototypes/README.md 與 registry.yml，建立 exploring prototype，並在接受前明確區分 experimental 與 accepted。"
+  } elseif ($generatedSummary | Where-Object { $_ -match "reports" }) {
+    Write-Line "下一步建議：當需要查看目前專案狀態時，請使用「指令：專案報告」，或執行 bash ./vibe-coding/vibe-starter/scripts/report --open。"
   } elseif ($generatedSummary | Where-Object { $_ -match "layouts|design-system" }) {
     Write-Line "下一步建議：先確認技術決策與是否需要 UI/UX Designer 協助，再整理 vibe-coding/ui/design-system.md 與 vibe-coding/layouts/index.md。"
   } elseif ($generatedSummary | Where-Object { $_ -match "milestones" }) {

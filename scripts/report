@@ -1,0 +1,362 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source "$(cd "$(dirname "$0")" && pwd)/lib/common.sh"
+
+OPEN_AFTER_GENERATE="false"
+
+for arg in "$@"; do
+  case "${arg}" in
+    --open|-o)
+      OPEN_AFTER_GENERATE="true"
+      ;;
+    --help|-h)
+      print_line "用法：bash ./vibe-coding/vibe-starter/scripts/report [--open]"
+      exit 0
+      ;;
+    *)
+      fail "不支援的 report 參數：${arg}"
+      ;;
+  esac
+done
+
+ensure_report_source_files() {
+  ensure_dir "${REPORTS_DIR}"
+  ensure_dir "${REPORT_DATA_DIR}"
+  ensure_dir "${REPORT_HTML_DIR}"
+
+  if [[ ! -e "${REPORT_DATA_DIR}/project-state.yml" ]]; then
+    cp "${STARTER_ROOT}/templates/reports/data/project-state.yml" "${REPORT_DATA_DIR}/project-state.yml"
+  fi
+
+  if [[ ! -e "${REPORTS_DIR}/current-status.md" ]]; then
+    cp "${STARTER_ROOT}/templates/reports/current-status.md" "${REPORTS_DIR}/current-status.md"
+  fi
+}
+
+open_dashboard() {
+  local html_path="$1"
+  local open_status="無可用開啟指令，請手動開啟：${html_path}"
+
+  if command -v wslview >/dev/null 2>&1; then
+    wslview "${html_path}" >/dev/null 2>&1 &
+    open_status="已嘗試使用 wslview 開啟。"
+  elif command -v explorer.exe >/dev/null 2>&1 && command -v wslpath >/dev/null 2>&1; then
+    explorer.exe "$(wslpath -w "${html_path}")" >/dev/null 2>&1 &
+    open_status="已嘗試使用 explorer.exe 開啟。"
+  elif command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "${html_path}" >/dev/null 2>&1 &
+    open_status="已嘗試使用 xdg-open 開啟。"
+  elif command -v open >/dev/null 2>&1; then
+    open "${html_path}" >/dev/null 2>&1 &
+    open_status="已嘗試使用 open 開啟。"
+  fi
+
+  print_line "${open_status}"
+}
+
+render_dashboard() {
+  if ! command -v python3 >/dev/null 2>&1; then
+    fail "找不到 python3，無法產生 HTML report。"
+  fi
+
+  export PROJECT_ROOT
+  python3 - <<'PY'
+from __future__ import annotations
+
+from datetime import datetime
+from html import escape
+from pathlib import Path
+import os
+import re
+
+project_root = Path(os.environ["PROJECT_ROOT"])
+state_path = project_root / "reports" / "data" / "project-state.yml"
+status_path = project_root / "reports" / "current-status.md"
+html_path = project_root / "reports" / "html" / "index.html"
+
+state_text = state_path.read_text(encoding="utf-8")
+status_text = status_path.read_text(encoding="utf-8")
+
+
+def first_match(pattern: str, text: str) -> str:
+    match = re.search(pattern, text, re.MULTILINE)
+    if not match:
+        return ""
+    return match.group(1).strip().strip('"').strip("'")
+
+
+def top_level_block(name: str, text: str) -> str:
+    pattern = rf"^{re.escape(name)}:\n(?P<body>(?:[ \t].*\n|[ \t]*\n)*)"
+    match = re.search(pattern, text, re.MULTILINE)
+    if not match:
+        return ""
+    return match.group("body").rstrip()
+
+
+def nested_scalar(block: str, key: str) -> str:
+    return first_match(rf"^[ \t]+{re.escape(key)}:[ \t]*(.*)$", block)
+
+
+def markdown_snapshot_time(text: str) -> str:
+    return first_match(r"^(?:彙整時間|summarized_at)[ \t]*[：:][ \t]*(.*)$", text)
+
+
+project_block = top_level_block("project", state_text)
+source_summarized_at = first_match(r"^summarized_at:[ \t]*(.*)$", state_text) or markdown_snapshot_time(status_text) or "未記錄"
+generated_at = datetime.now().astimezone().isoformat(timespec="seconds")
+
+project_name = nested_scalar(project_block, "name") or "未命名專案"
+project_goal = nested_scalar(project_block, "goal") or "未記錄"
+current_status = nested_scalar(project_block, "current_status") or "未記錄"
+current_milestone = nested_scalar(project_block, "current_milestone") or "未記錄"
+updated_at = nested_scalar(project_block, "updated_at") or "未記錄"
+
+
+def render_table(lines: list[str]) -> str:
+    rows = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped.startswith("|") or not stripped.endswith("|"):
+            continue
+        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+        if all(re.fullmatch(r":?-{3,}:?", cell) for cell in cells):
+            continue
+        rows.append(cells)
+    if not rows:
+        return ""
+    head = rows[0]
+    body = rows[1:]
+    html = ["<div class=\"table-wrap\"><table><thead><tr>"]
+    html.extend(f"<th>{escape(cell)}</th>" for cell in head)
+    html.append("</tr></thead><tbody>")
+    for row in body:
+        html.append("<tr>")
+        html.extend(f"<td>{escape(cell)}</td>" for cell in row)
+        html.append("</tr>")
+    html.append("</tbody></table></div>")
+    return "".join(html)
+
+
+def render_markdown(text: str) -> str:
+    output: list[str] = []
+    paragraph: list[str] = []
+    list_open = False
+    table_lines: list[str] = []
+
+    def flush_paragraph() -> None:
+        nonlocal paragraph
+        if paragraph:
+            output.append(f"<p>{escape(' '.join(paragraph))}</p>")
+            paragraph = []
+
+    def flush_list() -> None:
+        nonlocal list_open
+        if list_open:
+            output.append("</ul>")
+            list_open = False
+
+    def flush_table() -> None:
+        nonlocal table_lines
+        if table_lines:
+            output.append(render_table(table_lines))
+            table_lines = []
+
+    for raw_line in text.splitlines():
+        line = raw_line.rstrip()
+        if line.strip().startswith("|") and line.strip().endswith("|"):
+            flush_paragraph()
+            flush_list()
+            table_lines.append(line)
+            continue
+        flush_table()
+
+        if not line.strip():
+            flush_paragraph()
+            flush_list()
+            continue
+
+        heading = re.match(r"^(#{1,6})\s+(.*)$", line)
+        if heading:
+            flush_paragraph()
+            flush_list()
+            level = min(len(heading.group(1)) + 1, 6)
+            output.append(f"<h{level}>{escape(heading.group(2))}</h{level}>")
+            continue
+
+        bullet = re.match(r"^\s*[-*]\s+(.*)$", line)
+        if bullet:
+            flush_paragraph()
+            if not list_open:
+                output.append("<ul>")
+                list_open = True
+            output.append(f"<li>{escape(bullet.group(1))}</li>")
+            continue
+
+        paragraph.append(line.strip())
+
+    flush_table()
+    flush_paragraph()
+    flush_list()
+    return "\n".join(output)
+
+
+def section(title: str, body: str, *, open_section: bool = False) -> str:
+    open_attr = " open" if open_section else ""
+    return f"""
+      <details class="section" id="{escape(title.lower().replace(' ', '-'))}"{open_attr}>
+        <summary>{escape(title)}</summary>
+        <div class="section-body">{body}</div>
+      </details>
+    """
+
+
+def yaml_section(name: str, title: str) -> str:
+    block = top_level_block(name, state_text)
+    if not block.strip():
+        block = "尚未記錄"
+    return section(title, f"<pre>{escape(block)}</pre>")
+
+
+status_html = render_markdown(status_text)
+sections = [
+    section("Current Status Markdown", status_html, open_section=True),
+    yaml_section("context_view", "Context View"),
+    yaml_section("execution_view", "Execution View"),
+    yaml_section("risk_view", "Risk View"),
+    yaml_section("activity_view", "Activity View"),
+    section("Project State YAML", f"<pre>{escape(state_text)}</pre>"),
+]
+
+html = f"""<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{escape(project_name)} - Project Report</title>
+  <style>
+    :root {{
+      color-scheme: light;
+      --bg: #f5f7fa;
+      --surface: #ffffff;
+      --text: #17202a;
+      --muted: #667085;
+      --line: #d8dee8;
+      --accent: #2563eb;
+      --accent-soft: #e8f0ff;
+      --warn: #9a3412;
+      --ok: #166534;
+    }}
+    * {{ box-sizing: border-box; }}
+    body {{ margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--text); background: var(--bg); }}
+    header {{ background: var(--surface); border-bottom: 1px solid var(--line); }}
+    .wrap {{ max-width: 1180px; margin: 0 auto; padding: 24px; }}
+    h1 {{ margin: 0 0 8px; font-size: 30px; letter-spacing: 0; }}
+    h2, h3, h4 {{ letter-spacing: 0; }}
+    p {{ line-height: 1.65; }}
+    .meta {{ display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; color: var(--muted); font-size: 14px; }}
+    .pill {{ border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; background: #fff; }}
+    .layout {{ display: grid; grid-template-columns: 240px 1fr; gap: 20px; align-items: start; }}
+    nav {{ position: sticky; top: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }}
+    nav a {{ display: block; color: var(--text); text-decoration: none; padding: 8px 10px; border-radius: 6px; font-size: 14px; }}
+    nav a:hover {{ background: var(--accent-soft); color: var(--accent); }}
+    .toolbar {{ display: flex; gap: 10px; margin-bottom: 16px; }}
+    input[type="search"] {{ width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 11px 12px; font-size: 15px; }}
+    .cards {{ display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 18px 0 8px; }}
+    .card {{ background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; min-width: 0; }}
+    .card span {{ display: block; color: var(--muted); font-size: 12px; margin-bottom: 6px; }}
+    .card strong {{ display: block; font-size: 15px; overflow-wrap: anywhere; }}
+    .section {{ background: var(--surface); border: 1px solid var(--line); border-radius: 8px; margin-bottom: 12px; overflow: hidden; }}
+    .section[hidden] {{ display: none; }}
+    summary {{ cursor: pointer; padding: 16px 18px; font-weight: 700; }}
+    .section-body {{ border-top: 1px solid var(--line); padding: 18px; }}
+    pre {{ white-space: pre-wrap; overflow-wrap: anywhere; background: #111827; color: #f9fafb; padding: 16px; border-radius: 8px; overflow: auto; }}
+    code {{ background: #eef2f7; padding: 2px 5px; border-radius: 4px; }}
+    table {{ width: 100%; border-collapse: collapse; font-size: 14px; }}
+    th, td {{ border: 1px solid var(--line); padding: 8px; text-align: left; vertical-align: top; }}
+    th {{ background: #f0f4f8; }}
+    .table-wrap {{ overflow-x: auto; }}
+    .empty-note {{ color: var(--muted); }}
+    footer {{ color: var(--muted); font-size: 13px; padding-top: 16px; }}
+    @media (max-width: 900px) {{
+      .layout {{ grid-template-columns: 1fr; }}
+      nav {{ position: static; }}
+      .cards {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
+    }}
+    @media (max-width: 560px) {{
+      .wrap {{ padding: 18px; }}
+      .cards {{ grid-template-columns: 1fr; }}
+    }}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>{escape(project_name)}</h1>
+      <p class="empty-note">固定格式 Project Report Dashboard。HTML 是靜態 snapshot，不會自動跟著 source 檔或專案資料更新。</p>
+      <div class="meta">
+        <span class="pill">source_summarized_at: {escape(source_summarized_at)}</span>
+        <span class="pill">generated_at: {escape(generated_at)}</span>
+        <span class="pill">updated_at: {escape(updated_at)}</span>
+      </div>
+      <div class="cards">
+        <div class="card"><span>Goal</span><strong>{escape(project_goal)}</strong></div>
+        <div class="card"><span>Current Status</span><strong>{escape(current_status)}</strong></div>
+        <div class="card"><span>Current Milestone</span><strong>{escape(current_milestone)}</strong></div>
+        <div class="card"><span>Source</span><strong>YAML + Markdown snapshot</strong></div>
+      </div>
+    </div>
+  </header>
+  <main class="wrap layout">
+    <nav aria-label="Report sections">
+      <a href="#current-status-markdown">Current Status</a>
+      <a href="#context-view">Context View</a>
+      <a href="#execution-view">Execution View</a>
+      <a href="#risk-view">Risk View</a>
+      <a href="#activity-view">Activity View</a>
+      <a href="#project-state-yaml">Project State YAML</a>
+    </nav>
+    <div>
+      <div class="toolbar">
+        <input id="filter" type="search" placeholder="Filter report text...">
+      </div>
+      {''.join(sections)}
+      <footer>
+        <p>Report source: <code>reports/data/project-state.yml</code> and <code>reports/current-status.md</code>.</p>
+      </footer>
+    </div>
+  </main>
+  <script>
+    const filter = document.getElementById('filter');
+    const sections = Array.from(document.querySelectorAll('.section'));
+    filter.addEventListener('input', () => {{
+      const q = filter.value.trim().toLowerCase();
+      for (const section of sections) {{
+        const text = section.innerText.toLowerCase();
+        section.hidden = q && !text.includes(q);
+        if (q && !section.hidden) section.open = true;
+      }}
+    }});
+  </script>
+</body>
+</html>
+"""
+
+html_path.write_text(html, encoding="utf-8")
+print(html_path)
+PY
+}
+
+main() {
+  ensure_project_root
+  ensure_report_source_files
+  local html_path
+  html_path="$(render_dashboard)"
+  print_line "報告已產生：${html_path}"
+  if [[ "${OPEN_AFTER_GENERATE}" == "true" ]]; then
+    open_dashboard "${html_path}"
+  fi
+}
+
+main
