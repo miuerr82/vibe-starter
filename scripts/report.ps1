@@ -298,7 +298,7 @@ function Render-Dashboard {
     <div>
       <div class="toolbar"><input id="filter" type="search" placeholder="Filter report text..."></div>
       $($sections -join "`n")
-      <footer><p>Report source: <code>reports/data/project-state.yml</code> and <code>reports/current-status.md</code>.</p></footer>
+      <footer><p>Report source: <code>vibe-coding/reports/data/project-state.yml</code> and <code>vibe-coding/reports/current-status.md</code>.</p></footer>
     </div>
   </main>
   <script>

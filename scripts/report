@@ -72,9 +72,10 @@ import os
 import re
 
 project_root = Path(os.environ["PROJECT_ROOT"])
-state_path = project_root / "reports" / "data" / "project-state.yml"
-status_path = project_root / "reports" / "current-status.md"
-html_path = project_root / "reports" / "html" / "index.html"
+reports_root = project_root / "vibe-coding" / "reports"
+state_path = reports_root / "data" / "project-state.yml"
+status_path = reports_root / "current-status.md"
+html_path = reports_root / "html" / "index.html"
 
 state_text = state_path.read_text(encoding="utf-8")
 status_text = status_path.read_text(encoding="utf-8")
@@ -323,7 +324,7 @@ html = f"""<!doctype html>
       </div>
       {''.join(sections)}
       <footer>
-        <p>Report source: <code>reports/data/project-state.yml</code> and <code>reports/current-status.md</code>.</p>
+        <p>Report source: <code>vibe-coding/reports/data/project-state.yml</code> and <code>vibe-coding/reports/current-status.md</code>.</p>
       </footer>
     </div>
   </main>
