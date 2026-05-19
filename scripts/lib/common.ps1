@@ -24,6 +24,7 @@ $Script:PrototypesDir = Join-Path $Script:WorkspaceDir "prototypes"
 $Script:ReportsDir = Join-Path $Script:WorkspaceDir "reports"
 $Script:ReportDataDir = Join-Path $Script:ReportsDir "data"
 $Script:ReportHtmlDir = Join-Path $Script:ReportsDir "html"
+$Script:NotesDir = Join-Path $Script:WorkspaceDir "notes"
 
 function Write-Line {
   param(

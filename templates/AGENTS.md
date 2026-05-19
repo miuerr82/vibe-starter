@@ -20,6 +20,7 @@
 - 預設 prototype 工作目錄為 `vibe-coding/prototypes/`
 - 預設 project report source 為 `vibe-coding/reports/data/project-state.yml` 與 `vibe-coding/reports/current-status.md`
 - 預設 project report dashboard 為 `vibe-coding/reports/html/index.html`
+- 預設 implementation notes 檔案為 `vibe-coding/notes/implementation-notes.md`
 
 ## 工作原則
 
@@ -123,6 +124,20 @@
 - prototype registry 應記錄在 `vibe-coding/prototypes/registry.yml`
 - accepted prototype 應作為畫面實作與防止 design drift 的參考依據
 - deprecated prototype 應保留棄用或被取代原因，避免重複走回已否決方向
+
+## Implementation Notes
+
+- 實作過程中應持續維護 `vibe-coding/notes/implementation-notes.md`，記錄實作對 spec 的詮釋、偏離、取捨、未決問題與驗證狀況
+- 這份文件的目的是讓未來檢視、交接、治理的人能看懂實作如何詮釋 spec，不是進度日誌
+- 應在以下情境新增條目：
+  - spec 不夠明確、必須做出選擇時，記錄 design decision 與選擇理由
+  - 刻意偏離 spec 時，記錄 deviation、偏離原因，以及 spec 是否應被回寫
+  - 評估多個方案後選定其中之一時，記錄 tradeoff 與被淘汰方案
+  - 出現需要 owner 確認的問題，或可能影響未來行為、資料、UI、migration 或相容性的疑問時，記錄為 open question
+  - 完成驗證、跳過驗證或留下已知風險時，記錄 verification note
+- 不可在 `vibe-coding/notes/implementation-notes.md` 中記錄進度或下一步；進度以 `vibe-coding/milestones/` 為準，交接以 `vibe-coding/handoff/` 為準
+- 若 `deviation` 或 `open question` 已被解決，應建議把結論回寫到對應 `vibe-coding/specs/` 檔案或 `vibe-coding/specs/decisions.md`，並在 notes 中標示 resolved 與引用位置
+- 預設使用單一 rolling 檔；只有在 milestone 實作量極大、需要獨立追蹤時，才額外建立 `vibe-coding/notes/<milestone-id>.md`
 
 ## 起手引導
 
