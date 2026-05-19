@@ -3,8 +3,8 @@ $ErrorActionPreference = "Stop"
 
 . (Join-Path $PSScriptRoot "lib\common.ps1")
 
-$Script:ClaudeDir = Join-Path $Script:ProjectRoot ".claude"
-$Script:ClaudeSkillsDir = Join-Path $Script:ClaudeDir "skills"
+$Script:ClaudeDir = ""
+$Script:ClaudeSkillsDir = ""
 
 $SkillKeys = @(
   "spec-driven-consultant",
@@ -216,12 +216,15 @@ function Install-SkillTemplate {
 }
 
 try {
-  Ensure-ProjectRoot
+  Initialize-Starter -ArgList $args
+  $Script:ClaudeDir = Join-Path $Script:ProjectRoot ".claude"
+  $Script:ClaudeSkillsDir = Join-Path $Script:ClaudeDir "skills"
   Ensure-Dir $Script:ClaudeDir
   Ensure-Dir $Script:ClaudeSkillsDir
 
-  $mode = if ($args.Count -gt 0) { [string]$args[0] } else { "" }
-  $remainingArgs = if ($args.Count -gt 1) { $args[1..($args.Count - 1)] } else { @() }
+  $starterArgs = $Script:StarterArgs
+  $mode = if ($starterArgs.Count -gt 0) { [string]$starterArgs[0] } else { "" }
+  $remainingArgs = if ($starterArgs.Count -gt 1) { $starterArgs[1..($starterArgs.Count - 1)] } else { @() }
   $selectedTargets = Get-RequestedTargets -Mode $mode -RemainingArgs $remainingArgs
 
   $installSummary = @()

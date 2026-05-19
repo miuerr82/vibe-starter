@@ -4,8 +4,8 @@ set -euo pipefail
 
 source "$(cd "$(dirname "$0")" && pwd)/lib/common.sh"
 
-CLAUDE_DIR="${PROJECT_ROOT}/.claude"
-CLAUDE_SKILLS_DIR="${CLAUDE_DIR}/skills"
+CLAUDE_DIR=""
+CLAUDE_SKILLS_DIR=""
 
 SKILL_KEYS=(
   "spec-driven-consultant"
@@ -214,7 +214,8 @@ main() {
   local selected
   local selected_targets=()
 
-  ensure_project_root
+  CLAUDE_DIR="${PROJECT_ROOT}/.claude"
+  CLAUDE_SKILLS_DIR="${CLAUDE_DIR}/skills"
   ensure_dir "${CLAUDE_DIR}"
   ensure_dir "${CLAUDE_SKILLS_DIR}"
 
@@ -229,4 +230,5 @@ main() {
   print_line "安裝位置：.claude/skills/"
 }
 
-main "$@"
+bootstrap_starter "$@"
+main "${STARTER_ARGS[@]:-}"

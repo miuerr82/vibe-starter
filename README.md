@@ -10,6 +10,16 @@
 
 後續真正的產品開發，仍然以產品專案根目錄為主。
 
+## 執行位置
+
+所有 launcher（`init`、`generate`、`install-skill`、`report`）都會自動推論專案根目錄，因此不再強制要求一定要從產品專案根目錄執行：
+
+- 從產品專案根目錄執行：靜默通過，與舊版相同
+- 從其他位置執行（例如 Windows 雙擊 `.cmd`、在 starter 目錄裡執行）：腳本會用自身位置推論出專案根目錄，並在 TTY 互動模式下顯示確認提示，按 Enter 即接受
+- 非互動模式（CI / piped）：直接使用推論結果，不阻塞
+- 也可以用 `--project-root <path>` 明確指定根目錄，例如 `bash ./scripts/generate --project-root /path/to/project all`
+- 不論用哪種方式解析，最終仍會驗證 `<project_root>/vibe-coding/vibe-starter` 必須與目前執行的腳本同一份，避免取錯專案
+
 ## Quick Start
 
 如果你是第一次使用，先照下面其中一種方式做即可。
@@ -167,7 +177,7 @@ Windows cmd：
 
 `init` 目前會：
 
-- 確認你是從產品專案根目錄執行
+- 解析並驗證產品專案根目錄（自動推論，或讀取 `--project-root` flag）
 - 確保 `vibe-coding/` 存在
 - 建立或補齊 `vibe-coding/.gitignore`
 - 將 `vibe-starter` 加入 `vibe-coding/.gitignore`

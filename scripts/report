@@ -4,22 +4,26 @@ set -euo pipefail
 
 source "$(cd "$(dirname "$0")" && pwd)/lib/common.sh"
 
+bootstrap_starter "$@"
+
 OPEN_AFTER_GENERATE="false"
 
-for arg in "$@"; do
-  case "${arg}" in
-    --open|-o)
-      OPEN_AFTER_GENERATE="true"
-      ;;
-    --help|-h)
-      print_line "用法：bash ./vibe-coding/vibe-starter/scripts/report [--open]"
-      exit 0
-      ;;
-    *)
-      fail "不支援的 report 參數：${arg}"
-      ;;
-  esac
-done
+if [[ ${#STARTER_ARGS[@]} -gt 0 ]]; then
+  for arg in "${STARTER_ARGS[@]}"; do
+    case "${arg}" in
+      --open|-o)
+        OPEN_AFTER_GENERATE="true"
+        ;;
+      --help|-h)
+        print_line "用法：bash ./vibe-coding/vibe-starter/scripts/report [--open] [--project-root <path>]"
+        exit 0
+        ;;
+      *)
+        fail "不支援的 report 參數：${arg}"
+        ;;
+    esac
+  done
+fi
 
 ensure_report_source_files() {
   ensure_dir "${REPORTS_DIR}"
@@ -421,7 +425,6 @@ PY
 }
 
 main() {
-  ensure_project_root
   ensure_report_source_files
   local html_path
   html_path="$(render_dashboard)"

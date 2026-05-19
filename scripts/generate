@@ -343,7 +343,6 @@ main() {
   shift || true
   local selected
 
-  ensure_project_root
   ensure_dir "${WORKSPACE_DIR}"
   ensure_dir "${SPECS_DIR}"
   ensure_dir "${HANDOFF_DIR}"
@@ -392,4 +391,5 @@ main() {
   print_line "若使用 Claude，可執行 install-skill 安裝 project-level skills。"
 }
 
-main "$@"
+bootstrap_starter "$@"
+main "${STARTER_ARGS[@]:-}"

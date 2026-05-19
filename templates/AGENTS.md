@@ -21,6 +21,7 @@
 - 預設 project report source 為 `vibe-coding/reports/data/project-state.yml` 與 `vibe-coding/reports/current-status.md`
 - 預設 project report dashboard 為 `vibe-coding/reports/html/index.html`
 - 預設 implementation notes 檔案為 `vibe-coding/notes/implementation-notes.md`
+- starter launcher 會自動解析專案根目錄，因此不再強制要求從專案根目錄執行；必要時可加 `--project-root <path>` 明確指定根目錄
 
 ## 工作原則
 

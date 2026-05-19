@@ -387,7 +387,7 @@ function Get-RequestedTargets {
 }
 
 try {
-  Ensure-ProjectRoot
+  Initialize-Starter -ArgList $args
   Ensure-Dir $Script:WorkspaceDir
   Ensure-Dir $Script:SpecsDir
   Ensure-Dir $Script:HandoffDir
@@ -408,8 +408,9 @@ try {
   Ensure-Dir $Script:ReportHtmlDir
   Ensure-Dir $Script:NotesDir
 
-  $mode = if ($args.Count -gt 0) { [string]$args[0] } else { "" }
-  $remainingArgs = if ($args.Count -gt 1) { $args[1..($args.Count - 1)] } else { @() }
+  $starterArgs = $Script:StarterArgs
+  $mode = if ($starterArgs.Count -gt 0) { [string]$starterArgs[0] } else { "" }
+  $remainingArgs = if ($starterArgs.Count -gt 1) { $starterArgs[1..($starterArgs.Count - 1)] } else { @() }
   $selectedTargets = Get-RequestedTargets -Mode $mode -RemainingArgs $remainingArgs
 
   $generatedSummary = @()

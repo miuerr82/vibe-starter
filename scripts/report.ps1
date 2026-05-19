@@ -4,17 +4,18 @@ $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "lib\common.ps1")
 
 $OpenAfterGenerate = $false
+Initialize-Starter -ArgList $args
 
-foreach ($arg in $args) {
+foreach ($arg in $Script:StarterArgs) {
   switch ($arg) {
     "--open" { $OpenAfterGenerate = $true }
     "-o" { $OpenAfterGenerate = $true }
     "--help" {
-      Write-Line "用法：.\vibe-coding\vibe-starter\scripts\report.ps1 [--open]"
+      Write-Line "用法：.\vibe-coding\vibe-starter\scripts\report.ps1 [--open] [--project-root <path>]"
       exit 0
     }
     "-h" {
-      Write-Line "用法：.\vibe-coding\vibe-starter\scripts\report.ps1 [--open]"
+      Write-Line "用法：.\vibe-coding\vibe-starter\scripts\report.ps1 [--open] [--project-root <path>]"
       exit 0
     }
     default {
@@ -475,7 +476,6 @@ function Render-Dashboard {
 }
 
 try {
-  Ensure-ProjectRoot
   Ensure-ReportSourceFiles
   $htmlPath = Render-Dashboard
   Write-Line "報告已產生：$htmlPath"

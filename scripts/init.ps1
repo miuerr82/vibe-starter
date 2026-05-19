@@ -4,7 +4,7 @@ $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "lib\common.ps1")
 
 try {
-  Ensure-ProjectRoot
+  Initialize-Starter -ArgList $args
   Ensure-Dir $Script:WorkspaceDir
 
   Append-UniqueLine (Join-Path $Script:WorkspaceDir ".gitignore") "vibe-starter"
@@ -14,7 +14,7 @@ try {
     -TargetPath (Join-Path $Script:ProjectRoot "AGENTS.md")
 
   Print-Summary -Title "初始化完成。已處理項目如下。" -Items @(
-    "已確認產品專案根目錄"
+    "已確認產品專案根目錄：$($Script:ProjectRoot)"
     "已確保 vibe-coding/.gitignore 忽略 vibe-starter"
     $agentsSummary
   )

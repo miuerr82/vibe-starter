@@ -10,21 +10,21 @@ if ($env:OS -eq "Windows_NT") {
 
 $Script:ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Script:StarterRoot = Split-Path -Parent (Split-Path -Parent $Script:ScriptDir)
-$currentLocation = Get-Location
-$Script:ProjectRoot = if ($null -ne $currentLocation.ProviderPath) { $currentLocation.ProviderPath } else { $currentLocation.Path }
-$Script:WorkspaceDir = Join-Path $Script:ProjectRoot "vibe-coding"
-$Script:SpecsDir = Join-Path $Script:WorkspaceDir "specs"
-$Script:HandoffDir = Join-Path $Script:WorkspaceDir "handoff"
-$Script:MilestonesDir = Join-Path $Script:WorkspaceDir "milestones"
-$Script:MilestoneTasksDir = Join-Path $Script:MilestonesDir "tasks"
-$Script:FeaturesDir = Join-Path $Script:WorkspaceDir "features"
-$Script:LayoutsDir = Join-Path $Script:WorkspaceDir "layouts"
-$Script:UiDir = Join-Path $Script:WorkspaceDir "ui"
-$Script:PrototypesDir = Join-Path $Script:WorkspaceDir "prototypes"
-$Script:ReportsDir = Join-Path $Script:WorkspaceDir "reports"
-$Script:ReportDataDir = Join-Path $Script:ReportsDir "data"
-$Script:ReportHtmlDir = Join-Path $Script:ReportsDir "html"
-$Script:NotesDir = Join-Path $Script:WorkspaceDir "notes"
+$Script:ProjectRoot = ""
+$Script:WorkspaceDir = ""
+$Script:SpecsDir = ""
+$Script:HandoffDir = ""
+$Script:MilestonesDir = ""
+$Script:MilestoneTasksDir = ""
+$Script:FeaturesDir = ""
+$Script:LayoutsDir = ""
+$Script:UiDir = ""
+$Script:PrototypesDir = ""
+$Script:ReportsDir = ""
+$Script:ReportDataDir = ""
+$Script:ReportHtmlDir = ""
+$Script:NotesDir = ""
+$Script:StarterArgs = @()
 
 function Write-Line {
   param(
@@ -44,17 +44,139 @@ function Fail {
   throw $Message
 }
 
-function Ensure-ProjectRoot {
-  $starterPath = Join-Path $Script:ProjectRoot "vibe-coding\vibe-starter"
+function Set-ProjectPaths {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Root
+  )
+
+  $Script:ProjectRoot = $Root
+  $Script:WorkspaceDir = Join-Path $Root "vibe-coding"
+  $Script:SpecsDir = Join-Path $Script:WorkspaceDir "specs"
+  $Script:HandoffDir = Join-Path $Script:WorkspaceDir "handoff"
+  $Script:MilestonesDir = Join-Path $Script:WorkspaceDir "milestones"
+  $Script:MilestoneTasksDir = Join-Path $Script:MilestonesDir "tasks"
+  $Script:FeaturesDir = Join-Path $Script:WorkspaceDir "features"
+  $Script:LayoutsDir = Join-Path $Script:WorkspaceDir "layouts"
+  $Script:UiDir = Join-Path $Script:WorkspaceDir "ui"
+  $Script:PrototypesDir = Join-Path $Script:WorkspaceDir "prototypes"
+  $Script:ReportsDir = Join-Path $Script:WorkspaceDir "reports"
+  $Script:ReportDataDir = Join-Path $Script:ReportsDir "data"
+  $Script:ReportHtmlDir = Join-Path $Script:ReportsDir "html"
+  $Script:NotesDir = Join-Path $Script:WorkspaceDir "notes"
+}
+
+function Test-ProjectRootCandidate {
+  param(
+    [Parameter(Mandatory = $true)]
+    [string]$Candidate,
+    [string]$Label = "專案根目錄"
+  )
+
+  if (-not (Test-Path -LiteralPath $Candidate -PathType Container)) {
+    Fail "${Label}不存在：$Candidate"
+  }
+
+  $starterPath = Join-Path $Candidate "vibe-coding\vibe-starter"
   if (-not (Test-Path -LiteralPath $starterPath -PathType Container)) {
-    Fail "找不到 .\vibe-coding\vibe-starter，請從產品專案根目錄執行。"
+    Fail "$Label $Candidate 中找不到 vibe-coding/vibe-starter。"
   }
 
   $expectedRoot = [System.IO.Path]::GetFullPath($Script:StarterRoot)
   $actualRoot = [System.IO.Path]::GetFullPath($starterPath)
   if ($expectedRoot -ne $actualRoot) {
-    Fail "目前執行位置與腳本所在的 vibe-starter 不一致，請回到產品專案根目錄後重試。"
+    Fail "$Label $Candidate 中的 vibe-coding/vibe-starter 與目前執行的 vibe-starter ($($Script:StarterRoot)) 不一致。"
   }
+}
+
+function Resolve-ProjectRoot {
+  param(
+    [string[]]$ArgList = @()
+  )
+
+  $remaining = New-Object System.Collections.Generic.List[string]
+  $explicitRoot = $null
+  $i = 0
+  while ($i -lt $ArgList.Count) {
+    $arg = [string]$ArgList[$i]
+    if ($arg -eq "--project-root") {
+      if (($i + 1) -ge $ArgList.Count) {
+        Fail "--project-root 需要提供路徑參數。"
+      }
+      $explicitRoot = [string]$ArgList[$i + 1]
+      $i += 2
+      continue
+    }
+    if ($arg -like "--project-root=*") {
+      $explicitRoot = $arg.Substring("--project-root=".Length)
+      $i += 1
+      continue
+    }
+    $remaining.Add($arg)
+    $i += 1
+  }
+
+  $Script:StarterArgs = $remaining.ToArray()
+
+  if (-not [string]::IsNullOrWhiteSpace($explicitRoot)) {
+    Test-ProjectRootCandidate -Candidate $explicitRoot -Label "--project-root"
+    Set-ProjectPaths -Root ([System.IO.Path]::GetFullPath($explicitRoot))
+    return
+  }
+
+  $currentLocation = Get-Location
+  $cwd = if ($null -ne $currentLocation.ProviderPath) { $currentLocation.ProviderPath } else { $currentLocation.Path }
+  $cwdStarter = Join-Path $cwd "vibe-coding\vibe-starter"
+  if (Test-Path -LiteralPath $cwdStarter -PathType Container) {
+    $expectedRoot = [System.IO.Path]::GetFullPath($Script:StarterRoot)
+    $actualRoot = [System.IO.Path]::GetFullPath($cwdStarter)
+    if ($expectedRoot -eq $actualRoot) {
+      Set-ProjectPaths -Root $cwd
+      return
+    }
+  }
+
+  $inferred = [System.IO.Path]::GetFullPath((Join-Path $Script:StarterRoot "..\.."))
+
+  $chosen = $null
+  $stdinTty = $true
+  try {
+    $stdinTty = -not [Console]::IsInputRedirected
+  } catch {
+    $stdinTty = $true
+  }
+
+  if ($stdinTty) {
+    [Console]::Error.WriteLine("目前不在專案根目錄。")
+    [Console]::Error.WriteLine("依腳本位置推論出的專案根目錄為：")
+    [Console]::Error.WriteLine("  $inferred")
+    $answer = Read-Host "是否使用此路徑？[Y/n/其他絕對路徑]"
+    switch -Regex ($answer) {
+      "^$" { $chosen = $inferred }
+      "^(y|Y|yes|YES)$" { $chosen = $inferred }
+      "^(n|N|no|NO)$" {
+        $customPath = Read-Host "請輸入專案根目錄絕對路徑"
+        if ([string]::IsNullOrWhiteSpace($customPath)) {
+          Fail "未提供專案根目錄路徑。"
+        }
+        $chosen = $customPath
+      }
+      default { $chosen = $answer }
+    }
+  } else {
+    $chosen = $inferred
+  }
+
+  Test-ProjectRootCandidate -Candidate $chosen -Label "解析到的專案根目錄"
+  Set-ProjectPaths -Root ([System.IO.Path]::GetFullPath($chosen))
+}
+
+function Initialize-Starter {
+  param(
+    [string[]]$ArgList = @()
+  )
+
+  Resolve-ProjectRoot -ArgList $ArgList
 }
 
 function Ensure-Dir {
