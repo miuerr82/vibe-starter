@@ -18,8 +18,8 @@
 - 預設 layout 設計目錄為 `vibe-coding/layouts/`
 - 預設 UI contract 檔案為 `vibe-coding/ui/design-system.md`
 - 預設 prototype 工作目錄為 `vibe-coding/prototypes/`
-- 預設 project report source 為 `reports/data/project-state.yml` 與 `reports/current-status.md`
-- 預設 project report dashboard 為 `reports/html/index.html`
+- 預設 project report source 為 `vibe-coding/reports/data/project-state.yml` 與 `vibe-coding/reports/current-status.md`
+- 預設 project report dashboard 為 `vibe-coding/reports/html/index.html`
 
 ## 工作原則
 
@@ -94,7 +94,7 @@
 - 當使用者輸入 `指令：專案報告`，或要求查看目前專案狀態時，AI 應整理 project report
 - Project report 是 on-demand / event-driven，不需要每次回覆都更新
 - Project report 的目的包含隨時查詢專案狀態，不限於 handoff
-- AI 應先讀取現有上下文，再更新 `reports/data/project-state.yml` 與 `reports/current-status.md`
+- AI 應先讀取現有上下文，再更新 `vibe-coding/reports/data/project-state.yml` 與 `vibe-coding/reports/current-status.md`
 - Report source 是 snapshot，必須記錄資料彙整時間；不可把它當成會自動跟著專案演進的 live state
 - 整理 report 時，應視需要查看：
   - `AGENTS.md`
@@ -104,12 +104,12 @@
   - `vibe-coding/handoff/`
   - `vibe-coding/prototypes/`
   - `vibe-coding/ui/design-system.md`
-  - `reports/data/project-state.yml`
-  - `reports/current-status.md`
+  - `vibe-coding/reports/data/project-state.yml`
+  - `vibe-coding/reports/current-status.md`
 - 觀察到的項目不可自動變成 task；應先分類為 context、decision、future option、milestone、task、validation、risk 或 handoff
 - 只有在已有明確執行決策時，才建立 milestone 或 task
 - 更新 YAML / Markdown 後，執行 `bash ./vibe-coding/vibe-starter/scripts/report --open`、`.\vibe-coding\vibe-starter\scripts\report.ps1 --open` 或 `.\vibe-coding\vibe-starter\scripts\report.cmd --open`
-- 若無法開啟瀏覽器，只要 `reports/html/index.html` 成功產生，report 仍視為完成
+- 若無法開啟瀏覽器，只要 `vibe-coding/reports/html/index.html` 成功產生，report 仍視為完成
 - Dashboard 必須顯示 `source_summarized_at` 與 `generated_at`；兩者時間意義不同
 
 ## Prototype

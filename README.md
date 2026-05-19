@@ -115,7 +115,7 @@ Windows cmd：
 - `vibe-coding/layouts/` 下的 layout 設計模板
 - `vibe-coding/ui/` 下的 UI contract 模板
 - `vibe-coding/prototypes/` 下的 prototype 探索與決策模板
-- `reports/` 下的 project report source 與 HTML dashboard 模板
+- `vibe-coding/reports/` 下的 project report source 與 HTML dashboard 模板
 
 ## 這個專案的用途
 
@@ -128,12 +128,12 @@ Windows cmd：
 
 2. `generate`
    - 在 `vibe-coding/` 下生成 spec、handoff、milestone、feature、layout、UI contract 與 prototype 模板
-   - 在 `reports/` 下生成 project report source 與 dashboard 模板
+   - 在 `vibe-coding/reports/` 下生成 project report source 與 dashboard 模板
    - 協助專案快速進入 spec-driven 工作方式
 
 3. `report`
-   - 讀取 `reports/data/project-state.yml` 與 `reports/current-status.md`
-   - 產生固定格式的單檔 HTML dashboard：`reports/html/index.html`
+   - 讀取 `vibe-coding/reports/data/project-state.yml` 與 `vibe-coding/reports/current-status.md`
+   - 產生固定格式的單檔 HTML dashboard：`vibe-coding/reports/html/index.html`
    - 可用 `--open` 嘗試開啟 dashboard；在 WSL 會優先嘗試 `wslview`、`explorer.exe`、`xdg-open`
 
 目前第一版聚焦在：
@@ -207,9 +207,9 @@ Windows cmd：
 - `prototypes/_template/README.md`
 - `prototypes/_template/decisions.md`
 - `prototypes/_template/notes.md`
-- `reports/data/project-state.yml`
-- `reports/current-status.md`
-- `reports/html/index.html`
+- `vibe-coding/reports/data/project-state.yml`
+- `vibe-coding/reports/current-status.md`
+- `vibe-coding/reports/html/index.html`
 - 可選：`specs/user_flows.md`
 
 這些文件的模板都位於：
@@ -308,7 +308,7 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 
 Project report 是需要查看專案狀態時才整理的 snapshot，不會每次 AI 回覆都自動更新。
 
-`report` 指令只負責把現有 `reports/data/project-state.yml` 與 `reports/current-status.md` 轉成 HTML dashboard；它不會自動理解專案內容，也不會自動更新 YAML / Markdown source。專案狀態整理仍由 AI 或人先完成。
+`report` 指令只負責把現有 `vibe-coding/reports/data/project-state.yml` 與 `vibe-coding/reports/current-status.md` 轉成 HTML dashboard；它不會自動理解專案內容，也不會自動更新 YAML / Markdown source。專案狀態整理仍由 AI 或人先完成。
 
 建議日常用法是在 CLI 中要求 AI：
 
@@ -318,8 +318,8 @@ Project report 是需要查看專案狀態時才整理的 snapshot，不會每�
 
 AI 應整理：
 
-- `reports/data/project-state.yml`
-- `reports/current-status.md`
+- `vibe-coding/reports/data/project-state.yml`
+- `vibe-coding/reports/current-status.md`
 
 然後執行：
 
@@ -346,12 +346,12 @@ bash ./vibe-coding/vibe-starter/scripts/report --open
 
 `scripts/report` 目前需要 `python3` 來產生 HTML；Windows 可使用 `report.ps1` 或 `report.cmd`，不需要 `python3`。
 
-若使用 `--open` 但環境無法自動開啟瀏覽器，只要 `reports/html/index.html` 成功產生，就視為完成。
+若使用 `--open` 但環境無法自動開啟瀏覽器，只要 `vibe-coding/reports/html/index.html` 成功產生，就視為完成。
 
 Report dashboard 會產生在：
 
 ```text
-reports/html/index.html
+vibe-coding/reports/html/index.html
 ```
 
 Dashboard 會顯示兩個時間：
@@ -363,9 +363,9 @@ HTML 是靜態 snapshot。若專案狀態之後改變，請重新使用 `指令�
 
 若要 commit report files，請確認：
 
-- `reports/data/project-state.yml` 或 `reports/current-status.md` 有明確的彙整時間
-- `reports/html/index.html` 顯示 `source_summarized_at`
-- `reports/html/index.html` 顯示 `generated_at`
+- `vibe-coding/reports/data/project-state.yml` 或 `vibe-coding/reports/current-status.md` 有明確的彙整時間
+- `vibe-coding/reports/html/index.html` 顯示 `source_summarized_at`
+- `vibe-coding/reports/html/index.html` 顯示 `generated_at`
 
 ## 初始化後的工作流程
 

@@ -181,6 +181,120 @@ function New-YamlSection {
   return New-ReportSection -Title $Title -Body "<pre>$(ConvertTo-HtmlText $block)</pre>"
 }
 
+function New-Panel {
+  param(
+    [string]$Title,
+    [string]$Body,
+    [string]$Id = ""
+  )
+
+  $idAttr = if ([string]::IsNullOrWhiteSpace($Id)) { "" } else { " id=`"$(ConvertTo-HtmlText $Id)`"" }
+  $html = @"
+    <section class="panel"$idAttr>
+      <h2>$(ConvertTo-HtmlText $Title)</h2>
+      $Body
+    </section>
+"@
+  return $html
+}
+
+function Get-YamlBlock {
+  param(
+    [string]$Name,
+    [string]$StateText
+  )
+
+  $block = Get-TopLevelBlock -Name $Name -Text $StateText
+  if ([string]::IsNullOrWhiteSpace($block)) {
+    return "尚未記錄"
+  }
+
+  return $block
+}
+
+function New-YamlPanel {
+  param(
+    [string]$Name,
+    [string]$Title,
+    [string]$Id,
+    [string]$StateText
+  )
+
+  $block = Get-YamlBlock -Name $Name -StateText $StateText
+  return New-Panel -Title $Title -Id $Id -Body "<pre>$(ConvertTo-HtmlText $block)</pre>"
+}
+
+function Get-KeywordCount {
+  param(
+    [string]$Text,
+    [string[]]$Keywords
+  )
+
+  $count = 0
+  foreach ($keyword in $Keywords) {
+    $matches = [regex]::Matches($Text, "\b" + [regex]::Escape($keyword) + "\b", [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+    $count += $matches.Count
+  }
+  return $count
+}
+
+function Get-DisplayCount {
+  param([int]$Count)
+
+  if ($Count -gt 0) {
+    return [string]$Count
+  }
+  return "—"
+}
+
+function Get-CompactText {
+  param(
+    [AllowNull()][string]$Text,
+    [int]$Limit = 72
+  )
+
+  $normalized = ([regex]::Replace([string]$Text, "\s+", " ")).Trim()
+  if ([string]::IsNullOrWhiteSpace($normalized)) {
+    return "未記錄"
+  }
+  if ($normalized.Length -le $Limit) {
+    return $normalized
+  }
+  return $normalized.Substring(0, $Limit - 1).TrimEnd() + "..."
+}
+
+function Get-MarkdownSection {
+  param(
+    [string]$Text,
+    [string[]]$TitlePatterns
+  )
+
+  $capture = $false
+  $captured = [System.Collections.Generic.List[string]]::new()
+  foreach ($line in ($Text -split "\r?\n")) {
+    $heading = [regex]::Match($line, "^(#{1,6})\s+(.*)$")
+    if ($heading.Success) {
+      if ($capture) {
+        break
+      }
+      $title = $heading.Groups[2].Value.Trim().ToLowerInvariant()
+      foreach ($pattern in $TitlePatterns) {
+        if ($title.Contains($pattern.ToLowerInvariant())) {
+          $capture = $true
+          break
+        }
+      }
+      continue
+    }
+
+    if ($capture) {
+      $captured.Add($line)
+    }
+  }
+
+  return (($captured -join "`n").Trim())
+}
+
 function Invoke-OpenDashboard {
   param([string]$HtmlPath)
 
@@ -221,98 +335,137 @@ function Render-Dashboard {
   if ([string]::IsNullOrWhiteSpace($updatedAt)) { $updatedAt = "未記錄" }
 
   $generatedAt = [DateTimeOffset]::Now.ToString("yyyy-MM-ddTHH:mm:sszzz")
-  $sections = @(
-    New-ReportSection -Title "Current Status Markdown" -Body (Convert-MarkdownToHtml $statusText) -OpenSection $true
-    New-YamlSection -Name "context_view" -Title "Context View" -StateText $stateText
-    New-YamlSection -Name "execution_view" -Title "Execution View" -StateText $stateText
-    New-YamlSection -Name "risk_view" -Title "Risk View" -StateText $stateText
-    New-YamlSection -Name "activity_view" -Title "Activity View" -StateText $stateText
-    New-ReportSection -Title "Project State YAML" -Body "<pre>$(ConvertTo-HtmlText $stateText)</pre>"
+  $executionBlock = Get-YamlBlock -Name "execution_view" -StateText $stateText
+  $contextBlock = Get-YamlBlock -Name "context_view" -StateText $stateText
+  $riskBlock = Get-YamlBlock -Name "risk_view" -StateText $stateText
+  $nextActionsText = Get-MarkdownSection -Text $statusText -TitlePatterns @("next", "下一步", "todo", "action")
+  if ([string]::IsNullOrWhiteSpace($nextActionsText)) {
+    $nextActionsText = "尚未整理。請由 AI 依目前專案狀態補入下一步。"
+  }
+
+  $completedCount = Get-DisplayCount (Get-KeywordCount -Text $executionBlock -Keywords @("completed", "done"))
+  $activeCount = Get-DisplayCount (Get-KeywordCount -Text $executionBlock -Keywords @("active", "executing"))
+  $pendingValidationCount = Get-DisplayCount (Get-KeywordCount -Text $executionBlock -Keywords @("pending"))
+  $riskCount = Get-DisplayCount (Get-KeywordCount -Text $riskBlock -Keywords @("severity", "risk"))
+  $compactMilestone = Get-CompactText -Text $currentMilestone -Limit 24
+  $compactStatus = Get-CompactText -Text $currentStatus -Limit 24
+
+  $mainPanels = @(
+    New-YamlPanel -Name "execution_view" -Title "Milestone Progress" -Id "milestone-progress" -StateText $stateText
+    New-Panel -Title "Pending Validations" -Id "pending-validations" -Body "<pre>$(ConvertTo-HtmlText $executionBlock)</pre>"
+    New-YamlPanel -Name "risk_view" -Title "Risks" -Id "risks" -StateText $stateText
+    New-YamlPanel -Name "activity_view" -Title "Recent Handoffs & Activity" -Id "recent-handoffs-activity" -StateText $stateText
+    New-Panel -Title "Current Status Markdown" -Id "current-status" -Body (Convert-MarkdownToHtml $statusText)
+    New-Panel -Title "Project State YAML" -Id "project-state-yaml" -Body "<pre>$(ConvertTo-HtmlText $stateText)</pre>"
+  )
+
+  $sidePanels = @(
+    New-Panel -Title "Next Actions" -Id "next-actions" -Body (Convert-MarkdownToHtml $nextActionsText)
+    New-Panel -Title "Observations" -Id "observations" -Body "<pre>$(ConvertTo-HtmlText $contextBlock)</pre>"
+    New-Panel -Title "Future Options" -Id "future-options" -Body "<pre>$(ConvertTo-HtmlText $contextBlock)</pre>"
+    New-Panel -Title "Pending Decisions" -Id "pending-decisions" -Body "<pre>$(ConvertTo-HtmlText $contextBlock)</pre>"
   )
 
   $html = @"
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>$(ConvertTo-HtmlText $projectName) - Project Report</title>
-  <style>
-    :root { color-scheme: light; --bg: #f5f7fa; --surface: #ffffff; --text: #17202a; --muted: #667085; --line: #d8dee8; --accent: #2563eb; --accent-soft: #e8f0ff; }
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--text); background: var(--bg); }
-    header { background: var(--surface); border-bottom: 1px solid var(--line); }
-    .wrap { max-width: 1180px; margin: 0 auto; padding: 24px; }
-    h1 { margin: 0 0 8px; font-size: 30px; letter-spacing: 0; }
-    p { line-height: 1.65; }
-    .meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; color: var(--muted); font-size: 14px; }
-    .pill { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; background: #fff; }
-    .layout { display: grid; grid-template-columns: 240px 1fr; gap: 20px; align-items: start; }
-    nav { position: sticky; top: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px; }
-    nav a { display: block; color: var(--text); text-decoration: none; padding: 8px 10px; border-radius: 6px; font-size: 14px; }
-    nav a:hover { background: var(--accent-soft); color: var(--accent); }
-    .toolbar { display: flex; gap: 10px; margin-bottom: 16px; }
-    input[type="search"] { width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 11px 12px; font-size: 15px; }
-    .cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 18px 0 8px; }
-    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; min-width: 0; }
-    .card span { display: block; color: var(--muted); font-size: 12px; margin-bottom: 6px; }
-    .card strong { display: block; font-size: 15px; overflow-wrap: anywhere; }
-    .section { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; margin-bottom: 12px; overflow: hidden; }
-    .section[hidden] { display: none; }
-    summary { cursor: pointer; padding: 16px 18px; font-weight: 700; }
-    .section-body { border-top: 1px solid var(--line); padding: 18px; }
-    pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #111827; color: #f9fafb; padding: 16px; border-radius: 8px; overflow: auto; }
-    code { background: #eef2f7; padding: 2px 5px; border-radius: 4px; }
-    footer { color: var(--muted); font-size: 13px; padding-top: 16px; }
-    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } nav { position: static; } .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    @media (max-width: 560px) { .wrap { padding: 18px; } .cards { grid-template-columns: 1fr; } }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>$(ConvertTo-HtmlText $projectName) - Project Report</title>
+<style>
+  :root {
+    --bg:#f1f5f9; --surface:#fff; --surface-2:#f8fafc;
+    --text:#0f172a; --muted:#64748b; --line:#e2e8f0;
+    --teal:#0d9488; --amber:#d97706; --red:#dc2626; --green:#16a34a; --slate:#475569;
+    --t-meta:1rem; --t-body:1.067rem; --t-item:1.2rem; --t-h3:1.333rem; --t-h2:1.467rem; --t-h1:2rem;
+  }
+  *{box-sizing:border-box}
+  html{font-size:15px}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);background:var(--bg);font-size:var(--t-body);line-height:1.6}
+  .wrap{max-width:1280px;margin:0 auto;padding:1.5rem}
+  header{background:var(--surface);border-bottom:1px solid var(--line)}
+  h1{margin:0;font-size:var(--t-h1);font-weight:700;letter-spacing:0}
+  h2{margin:0 0 1rem;font-size:var(--t-h2);font-weight:700;color:var(--slate);text-transform:uppercase;letter-spacing:.04em}
+  h3{margin:1rem 0 .375rem;font-size:var(--t-h3);font-weight:600}
+  p{margin:.5rem 0;line-height:1.65}
+  .sub{color:var(--muted);font-size:var(--t-body);margin-top:.5rem}
+  .meta-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.875rem;font-size:var(--t-meta);color:var(--muted)}
+  .meta-row span{background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:.375rem .75rem}
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:.75rem;margin:1.25rem 0 0}
+  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:.5rem;padding:1rem;display:flex;flex-direction:column;gap:.625rem;min-width:0}
+  .kpi .label{color:var(--muted);font-size:var(--t-meta);line-height:1;height:1.125rem;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kpi .value{font-size:var(--t-h1);font-weight:700;color:var(--text);line-height:1;height:2.25rem;display:inline-flex;align-items:center}
+  .kpi .delta{color:var(--muted);font-size:var(--t-meta);line-height:1;height:1.125rem;display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .kpi.ok .value{color:var(--green)}
+  .kpi.warn .value{color:var(--amber)}
+  .kpi.danger .value{color:var(--red)}
+  .toolbar{margin:0 0 1rem}
+  input[type="search"]{width:100%;border:1px solid var(--line);border-radius:.5rem;padding:.75rem .875rem;font-size:1rem;background:var(--surface)}
+  main{display:grid;grid-template-columns:1fr 20rem;gap:1.25rem;margin-top:1.25rem}
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:.625rem;padding:1.125rem;margin-bottom:.875rem}
+  .panel[hidden]{display:none}
+  aside .panel{padding:1rem}
+  pre{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--surface-2);border:1px solid var(--line);color:var(--slate);padding:1rem;border-radius:.5rem;overflow:auto;font-size:.95rem;line-height:1.55}
+  code{background:#eef2f7;padding:.125rem .375rem;border-radius:.25rem}
+  ul,ol{padding-left:1.25rem}
+  li{margin:.25rem 0}
+  footer{color:var(--muted);font-size:var(--t-meta);padding:1.125rem 0;text-align:center}
+  @media (max-width:1000px){.kpis{grid-template-columns:repeat(3,1fr)}main{grid-template-columns:1fr}aside .panel{padding:.875rem}}
+  @media (max-width:620px){.wrap{padding:1rem}.kpis{grid-template-columns:1fr 1fr}}
+</style>
 </head>
 <body>
-  <header>
-    <div class="wrap">
-      <h1>$(ConvertTo-HtmlText $projectName)</h1>
-      <p>固定格式 Project Report Dashboard。HTML 是靜態 snapshot，不會自動跟著 source 檔或專案資料更新。</p>
-      <div class="meta">
-        <span class="pill">source_summarized_at: $(ConvertTo-HtmlText $sourceSummarizedAt)</span>
-        <span class="pill">generated_at: $(ConvertTo-HtmlText $generatedAt)</span>
-        <span class="pill">updated_at: $(ConvertTo-HtmlText $updatedAt)</span>
-      </div>
-      <div class="cards">
-        <div class="card"><span>Goal</span><strong>$(ConvertTo-HtmlText $projectGoal)</strong></div>
-        <div class="card"><span>Current Status</span><strong>$(ConvertTo-HtmlText $currentStatus)</strong></div>
-        <div class="card"><span>Current Milestone</span><strong>$(ConvertTo-HtmlText $currentMilestone)</strong></div>
-        <div class="card"><span>Source</span><strong>YAML + Markdown snapshot</strong></div>
-      </div>
+<header>
+  <div class="wrap">
+    <h1>$(ConvertTo-HtmlText $projectName) <span style="color:var(--muted);font-weight:500;font-size:var(--t-h3)">- Project Report</span></h1>
+    <p class="sub">$(ConvertTo-HtmlText $projectGoal)</p>
+    <div class="meta-row">
+      <span>source_summarized_at: $(ConvertTo-HtmlText $sourceSummarizedAt)</span>
+      <span>generated_at: $(ConvertTo-HtmlText $generatedAt)</span>
+      <span>updated_at: $(ConvertTo-HtmlText $updatedAt)</span>
+      <span>current_status: $(ConvertTo-HtmlText $currentStatus)</span>
+      <span>current_milestone: $(ConvertTo-HtmlText $currentMilestone)</span>
     </div>
-  </header>
-  <main class="wrap layout">
-    <nav aria-label="Report sections">
-      <a href="#current-status-markdown">Current Status</a>
-      <a href="#context-view">Context View</a>
-      <a href="#execution-view">Execution View</a>
-      <a href="#risk-view">Risk View</a>
-      <a href="#activity-view">Activity View</a>
-      <a href="#project-state-yaml">Project State YAML</a>
-    </nav>
-    <div>
-      <div class="toolbar"><input id="filter" type="search" placeholder="Filter report text..."></div>
-      $($sections -join "`n")
-      <footer><p>Report source: <code>reports/data/project-state.yml</code> and <code>reports/current-status.md</code>.</p></footer>
+    <div class="kpis">
+      <div class="kpi ok"><div class="label">已完成項目</div><div class="value">$completedCount</div><div class="delta">execution_view snapshot</div></div>
+      <div class="kpi"><div class="label">作用中項目</div><div class="value">$activeCount</div><div class="delta">$(ConvertTo-HtmlText $compactMilestone)</div></div>
+      <div class="kpi warn"><div class="label">待驗證</div><div class="value">$pendingValidationCount</div><div class="delta">validations / pending</div></div>
+      <div class="kpi danger"><div class="label">風險紀錄</div><div class="value">$riskCount</div><div class="delta">risk_view snapshot</div></div>
+      <div class="kpi"><div class="label">資料彙整</div><div class="value">YML</div><div class="delta">$(ConvertTo-HtmlText $sourceSummarizedAt)</div></div>
+      <div class="kpi"><div class="label">狀態輸出</div><div class="value">MD</div><div class="delta">$(ConvertTo-HtmlText $compactStatus)</div></div>
     </div>
-  </main>
-  <script>
-    const filter = document.getElementById('filter');
-    const sections = Array.from(document.querySelectorAll('.section'));
-    filter.addEventListener('input', () => {
-      const q = filter.value.trim().toLowerCase();
-      for (const section of sections) {
-        const text = section.innerText.toLowerCase();
-        section.hidden = q && !text.includes(q);
-        if (q && !section.hidden) section.open = true;
-      }
-    });
-  </script>
+  </div>
+</header>
+
+<main class="wrap">
+  <div>
+    <div class="toolbar"><input id="filter" type="search" placeholder="Filter report text..."></div>
+    $($mainPanels -join "`n")
+  </div>
+  <aside>
+    $($sidePanels -join "`n")
+  </aside>
+</main>
+
+<div class="wrap">
+  <footer>
+    Source: <code>vibe-coding/reports/data/project-state.yml</code> + <code>vibe-coding/reports/current-status.md</code>.
+    HTML is a static snapshot; regenerate it when the source summary changes.
+  </footer>
+</div>
+
+<script>
+  const filter = document.getElementById('filter');
+  const sections = Array.from(document.querySelectorAll('.panel'));
+  filter.addEventListener('input', () => {
+    const q = filter.value.trim().toLowerCase();
+    for (const section of sections) {
+      const text = section.innerText.toLowerCase();
+      section.hidden = q && !text.includes(q);
+    }
+  });
+</script>
 </body>
 </html>
 "@

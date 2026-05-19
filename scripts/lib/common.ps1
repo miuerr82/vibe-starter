@@ -21,7 +21,7 @@ $Script:FeaturesDir = Join-Path $Script:WorkspaceDir "features"
 $Script:LayoutsDir = Join-Path $Script:WorkspaceDir "layouts"
 $Script:UiDir = Join-Path $Script:WorkspaceDir "ui"
 $Script:PrototypesDir = Join-Path $Script:WorkspaceDir "prototypes"
-$Script:ReportsDir = Join-Path $Script:ProjectRoot "reports"
+$Script:ReportsDir = Join-Path $Script:WorkspaceDir "reports"
 $Script:ReportDataDir = Join-Path $Script:ReportsDir "data"
 $Script:ReportHtmlDir = Join-Path $Script:ReportsDir "html"
 
