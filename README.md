@@ -10,6 +10,16 @@
 
 後續真正的產品開發，仍然以產品專案根目錄為主。
 
+## 執行位置
+
+所有 launcher（`init`、`generate`、`install-skill`、`report`）都會自動推論專案根目錄，因此不再強制要求一定要從產品專案根目錄執行：
+
+- 從產品專案根目錄執行：靜默通過，與舊版相同
+- 從其他位置執行（例如 Windows 雙擊 `.cmd`、在 starter 目錄裡執行）：腳本會用自身位置推論出專案根目錄，並在 TTY 互動模式下顯示確認提示，按 Enter 即接受
+- 非互動模式（CI / piped）：直接使用推論結果，不阻塞
+- 也可以用 `--project-root <path>` 明確指定根目錄，例如 `bash ./scripts/generate --project-root /path/to/project all`
+- 不論用哪種方式解析，最終仍會驗證 `<project_root>/vibe-coding/vibe-starter` 必須與目前執行的腳本同一份，避免取錯專案
+
 ## Quick Start
 
 如果你是第一次使用，先照下面其中一種方式做即可。
@@ -116,6 +126,7 @@ Windows cmd：
 - `vibe-coding/ui/` 下的 UI contract 模板
 - `vibe-coding/prototypes/` 下的 prototype 探索與決策模板
 - `vibe-coding/reports/` 下的 project report source 與 HTML dashboard 模板
+- `vibe-coding/notes/` 下的 implementation notes 模板
 
 ## 這個專案的用途
 
@@ -129,6 +140,7 @@ Windows cmd：
 2. `generate`
    - 在 `vibe-coding/` 下生成 spec、handoff、milestone、feature、layout、UI contract 與 prototype 模板
    - 在 `vibe-coding/reports/` 下生成 project report source 與 dashboard 模板
+   - 在 `vibe-coding/notes/` 下生成 implementation notes 模板
    - 協助專案快速進入 spec-driven 工作方式
 
 3. `report`
@@ -165,7 +177,7 @@ Windows cmd：
 
 `init` 目前會：
 
-- 確認你是從產品專案根目錄執行
+- 解析並驗證產品專案根目錄（自動推論，或讀取 `--project-root` flag）
 - 確保 `vibe-coding/` 存在
 - 建立或補齊 `vibe-coding/.gitignore`
 - 將 `vibe-starter` 加入 `vibe-coding/.gitignore`
@@ -210,6 +222,8 @@ Windows cmd：
 - `vibe-coding/reports/data/project-state.yml`
 - `vibe-coding/reports/current-status.md`
 - `vibe-coding/reports/html/index.html`
+- `notes/README.md`
+- `notes/implementation-notes.md`
 - 可選：`specs/user_flows.md`
 
 這些文件的模板都位於：
@@ -222,6 +236,7 @@ Windows cmd：
 - `templates/vibe-coding/ui/`
 - `templates/vibe-coding/prototypes/`
 - `templates/reports/`
+- `templates/vibe-coding/notes/`
 
 ## `generate` 使用方式
 
@@ -303,6 +318,7 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 - `20` / `prototypes` / `prototype_layer`
 - `21` / `reports` / `report_layer`
 - `22` / `user_flows` / `steps`
+- `23` / `notes` / `implementation_notes`
 
 ## `report` 使用方式
 
@@ -641,6 +657,30 @@ layout 類型可包含：
 - AI 可以協助生成 prototype，但預設應先歸類為 `exploring` 或 `comparing`
 - 在使用者明確確認前，AI 不可把實驗型 prototype 當成正式實作依據
 - 若 prototype 已被接受，後續畫面實作應優先比對 accepted prototype，避免 design drift
+
+## Implementation Notes Layer
+
+Implementation notes 層用來記錄「實作如何詮釋 spec」，是給未來檢視、交接、治理的人讀的詮釋紀錄，不是進度日誌。
+
+主要檔案：
+
+- `vibe-coding/notes/README.md`
+- `vibe-coding/notes/implementation-notes.md`
+
+每筆條目應記錄以下其中一種類型：
+
+- `design_decision`：在 spec 不夠明確時做出的選擇與理由
+- `deviation`：刻意偏離 spec 的地方、原因，以及 spec 是否應被回寫
+- `tradeoff`：被考慮過的替代方案與最終選擇理由
+- `open_question`：需要 owner 確認、可能影響未來行為、資料、UI、migration 或相容性的疑問
+- `verification`：已驗證與未驗證的部分、實作後已知風險
+
+工作方式：
+
+- 預設為單一 rolling 檔；只有在 milestone 實作量極大、需要獨立追蹤時，才額外建立 `vibe-coding/notes/<milestone-id>.md`
+- 不可在 notes 中記錄進度或下一步；進度以 `vibe-coding/milestones/` 為準，交接以 `vibe-coding/handoff/` 為準
+- 若 `deviation` 或 `open_question` 已被解決，應建議把結論回寫到 `vibe-coding/specs/` 或 `vibe-coding/specs/decisions.md`，並在 notes 中標示 resolved 與引用位置
+- 已寫入的條目保留作為歷史紀錄，不要刪除
 
 ## Claude Skills
 

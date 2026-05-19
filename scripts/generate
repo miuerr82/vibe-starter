@@ -29,6 +29,7 @@ FILE_KEYS=(
   "prototypes"
   "reports"
   "user_flows"
+  "notes"
 )
 
 ALIASES=(
@@ -54,6 +55,7 @@ ALIASES=(
   "prototype_layer"
   "report_layer"
   "steps"
+  "implementation_notes"
 )
 
 MENU_LABELS=(
@@ -79,6 +81,7 @@ MENU_LABELS=(
   "Prototype 層"
   "Project Report 層"
   "步驟流程"
+  "Implementation Notes 層"
 )
 
 canonical_mode() {
@@ -114,6 +117,7 @@ canonical_key() {
     20|prototypes|prototype_layer) print_line "prototypes" ;;
     21|reports|report_layer) print_line "reports" ;;
     22|user_flows|steps) print_line "user_flows" ;;
+    23|notes|implementation_notes) print_line "notes" ;;
     *) return 1 ;;
   esac
 }
@@ -217,6 +221,23 @@ generate_report_layer() {
   done
 }
 
+generate_notes_layer() {
+  local files=(
+    "${STARTER_ROOT}/templates/vibe-coding/notes/README.md|${NOTES_DIR}/README.md"
+    "${STARTER_ROOT}/templates/vibe-coding/notes/implementation-notes.md|${NOTES_DIR}/implementation-notes.md"
+  )
+  local mapping source_path target_path summary
+
+  ensure_dir "${NOTES_DIR}"
+
+  for mapping in "${files[@]}"; do
+    source_path="${mapping%%|*}"
+    target_path="${mapping#*|}"
+    copy_template_with_conflict_policy "${source_path}" "${target_path}" summary
+    GENERATED_SUMMARY+=("${summary}")
+  done
+}
+
 list_available_files() {
   local i=0
   print_line "可生成的文件如下：" >&2
@@ -305,6 +326,11 @@ run_generation() {
     return 0
   fi
 
+  if [[ "${key}" == "notes" ]]; then
+    generate_notes_layer
+    return 0
+  fi
+
   source_path="$(template_path_for "${key}")"
   target_path="$(target_path_for "${key}")"
 
@@ -317,7 +343,6 @@ main() {
   shift || true
   local selected
 
-  ensure_project_root
   ensure_dir "${WORKSPACE_DIR}"
   ensure_dir "${SPECS_DIR}"
   ensure_dir "${HANDOFF_DIR}"
@@ -336,6 +361,7 @@ main() {
   ensure_dir "${REPORTS_DIR}"
   ensure_dir "${REPORT_DATA_DIR}"
   ensure_dir "${REPORT_HTML_DIR}"
+  ensure_dir "${NOTES_DIR}"
 
   while IFS= read -r selected; do
     [[ -n "${selected}" ]] || continue
@@ -350,6 +376,8 @@ main() {
     print_line "下一步建議：先查看 vibe-coding/prototypes/README.md 與 registry.yml，建立 exploring prototype，並在接受前明確區分 experimental 與 accepted。"
   elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'reports'; then
     print_line "下一步建議：當需要查看目前專案狀態時，請使用「指令：專案報告」，或執行 bash ./vibe-coding/vibe-starter/scripts/report --open。"
+  elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'notes/implementation-notes\|notes/README'; then
+    print_line "下一步建議：實作中若需記錄詮釋、偏離、取捨、未決問題或驗證狀況，請更新 vibe-coding/notes/implementation-notes.md；進度與下一步請仍以 vibe-coding/milestones/ 為準。"
   elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'layouts\|design-system'; then
     print_line "下一步建議：先確認技術決策與是否需要 UI/UX Designer 協助，再整理 vibe-coding/ui/design-system.md 與 vibe-coding/layouts/index.md。"
   elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'milestones'; then
@@ -363,4 +391,5 @@ main() {
   print_line "若使用 Claude，可執行 install-skill 安裝 project-level skills。"
 }
 
-main "$@"
+bootstrap_starter "$@"
+main "${STARTER_ARGS[@]:-}"

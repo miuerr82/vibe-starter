@@ -25,7 +25,8 @@ $FileKeys = @(
   "ui_design_system",
   "prototypes",
   "reports",
-  "user_flows"
+  "user_flows",
+  "notes"
 )
 
 $Aliases = @(
@@ -50,7 +51,8 @@ $Aliases = @(
   "design_system",
   "prototype_layer",
   "report_layer",
-  "steps"
+  "steps",
+  "implementation_notes"
 )
 
 $MenuLabels = @(
@@ -75,7 +77,8 @@ $MenuLabels = @(
   "UI Design System",
   "Prototype 層",
   "Project Report 層",
-  "步驟流程"
+  "步驟流程",
+  "Implementation Notes 層"
 )
 
 function Get-CanonicalMode {
@@ -162,6 +165,9 @@ function Get-CanonicalKey {
     "22" { return "user_flows" }
     "user_flows" { return "user_flows" }
     "steps" { return "user_flows" }
+    "23" { return "notes" }
+    "notes" { return "notes" }
+    "implementation_notes" { return "notes" }
     default { return $null }
   }
 }
@@ -294,6 +300,28 @@ function New-ReportLayerOutputs {
   return $summaries
 }
 
+function New-NotesLayerOutputs {
+  $files = @(
+    @{
+      Source = Join-Path $Script:StarterRoot "templates\vibe-coding\notes\README.md"
+      Target = Join-Path $Script:NotesDir "README.md"
+    },
+    @{
+      Source = Join-Path $Script:StarterRoot "templates\vibe-coding\notes\implementation-notes.md"
+      Target = Join-Path $Script:NotesDir "implementation-notes.md"
+    }
+  )
+
+  Ensure-Dir $Script:NotesDir
+
+  $summaries = @()
+  foreach ($file in $files) {
+    $summaries += Copy-TemplateWithConflictPolicy -SourcePath $file.Source -TargetPath $file.Target
+  }
+
+  return $summaries
+}
+
 function Show-AvailableFiles {
   [Console]::Error.WriteLine("可生成的文件如下：")
   for ($i = 0; $i -lt $FileKeys.Count; $i++) {
@@ -359,7 +387,7 @@ function Get-RequestedTargets {
 }
 
 try {
-  Ensure-ProjectRoot
+  Initialize-Starter -ArgList $args
   Ensure-Dir $Script:WorkspaceDir
   Ensure-Dir $Script:SpecsDir
   Ensure-Dir $Script:HandoffDir
@@ -378,9 +406,11 @@ try {
   Ensure-Dir $Script:ReportsDir
   Ensure-Dir $Script:ReportDataDir
   Ensure-Dir $Script:ReportHtmlDir
+  Ensure-Dir $Script:NotesDir
 
-  $mode = if ($args.Count -gt 0) { [string]$args[0] } else { "" }
-  $remainingArgs = if ($args.Count -gt 1) { $args[1..($args.Count - 1)] } else { @() }
+  $starterArgs = $Script:StarterArgs
+  $mode = if ($starterArgs.Count -gt 0) { [string]$starterArgs[0] } else { "" }
+  $remainingArgs = if ($starterArgs.Count -gt 1) { $starterArgs[1..($starterArgs.Count - 1)] } else { @() }
   $selectedTargets = Get-RequestedTargets -Mode $mode -RemainingArgs $remainingArgs
 
   $generatedSummary = @()
@@ -403,6 +433,11 @@ try {
       continue
     }
 
+    if ($key -eq "notes") {
+      $generatedSummary += New-NotesLayerOutputs
+      continue
+    }
+
     $generatedSummary += Copy-TemplateWithConflictPolicy `
       -SourcePath (Get-TemplatePath $key) `
       -TargetPath (Get-TargetPath $key)
@@ -416,6 +451,8 @@ try {
     Write-Line "下一步建議：先查看 vibe-coding/prototypes/README.md 與 registry.yml，建立 exploring prototype，並在接受前明確區分 experimental 與 accepted。"
   } elseif ($generatedSummary | Where-Object { $_ -match "reports" }) {
     Write-Line "下一步建議：當需要查看目前專案狀態時，請使用「指令：專案報告」，或執行 bash ./vibe-coding/vibe-starter/scripts/report --open。"
+  } elseif ($generatedSummary | Where-Object { $_ -match "notes[\\/](implementation-notes|README)" }) {
+    Write-Line "下一步建議：實作中若需記錄詮釋、偏離、取捨、未決問題或驗證狀況，請更新 vibe-coding/notes/implementation-notes.md；進度與下一步請仍以 vibe-coding/milestones/ 為準。"
   } elseif ($generatedSummary | Where-Object { $_ -match "layouts|design-system" }) {
     Write-Line "下一步建議：先確認技術決策與是否需要 UI/UX Designer 協助，再整理 vibe-coding/ui/design-system.md 與 vibe-coding/layouts/index.md。"
   } elseif ($generatedSummary | Where-Object { $_ -match "milestones" }) {

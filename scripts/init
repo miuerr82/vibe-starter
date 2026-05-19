@@ -4,7 +4,7 @@ set -euo pipefail
 
 source "$(cd "$(dirname "$0")" && pwd)/lib/common.sh"
 
-ensure_project_root
+bootstrap_starter "$@"
 ensure_dir "${WORKSPACE_DIR}"
 
 append_unique_line "${WORKSPACE_DIR}/.gitignore" "vibe-starter"
@@ -16,7 +16,7 @@ copy_template_with_conflict_policy \
   agents_summary
 
 print_summary "初始化完成。已處理項目如下。" \
-  "已確認產品專案根目錄" \
+  "已確認產品專案根目錄：${PROJECT_ROOT}" \
   "已確保 vibe-coding/.gitignore 忽略 vibe-starter" \
   "${agents_summary}"
 

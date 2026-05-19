@@ -4,35 +4,25 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STARTER_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-PROJECT_ROOT="$(pwd)"
-WORKSPACE_DIR="${PROJECT_ROOT}/vibe-coding"
-SPECS_DIR="${WORKSPACE_DIR}/specs"
-HANDOFF_DIR="${WORKSPACE_DIR}/handoff"
-MILESTONES_DIR="${WORKSPACE_DIR}/milestones"
-MILESTONE_TASKS_DIR="${MILESTONES_DIR}/tasks"
-FEATURES_DIR="${WORKSPACE_DIR}/features"
-LAYOUTS_DIR="${WORKSPACE_DIR}/layouts"
-UI_DIR="${WORKSPACE_DIR}/ui"
-PROTOTYPES_DIR="${WORKSPACE_DIR}/prototypes"
-REPORTS_DIR="${WORKSPACE_DIR}/reports"
-REPORT_DATA_DIR="${REPORTS_DIR}/data"
-REPORT_HTML_DIR="${REPORTS_DIR}/html"
 
 readonly SCRIPT_DIR
 readonly STARTER_ROOT
-readonly PROJECT_ROOT
-readonly WORKSPACE_DIR
-readonly SPECS_DIR
-readonly HANDOFF_DIR
-readonly MILESTONES_DIR
-readonly MILESTONE_TASKS_DIR
-readonly FEATURES_DIR
-readonly LAYOUTS_DIR
-readonly UI_DIR
-readonly PROTOTYPES_DIR
-readonly REPORTS_DIR
-readonly REPORT_DATA_DIR
-readonly REPORT_HTML_DIR
+
+PROJECT_ROOT=""
+WORKSPACE_DIR=""
+SPECS_DIR=""
+HANDOFF_DIR=""
+MILESTONES_DIR=""
+MILESTONE_TASKS_DIR=""
+FEATURES_DIR=""
+LAYOUTS_DIR=""
+UI_DIR=""
+PROTOTYPES_DIR=""
+REPORTS_DIR=""
+REPORT_DATA_DIR=""
+REPORT_HTML_DIR=""
+NOTES_DIR=""
+STARTER_ARGS=()
 
 print_line() {
   printf '%s\n' "$1"
@@ -43,14 +33,121 @@ fail() {
   exit 1
 }
 
-ensure_project_root() {
-  if [[ ! -d "${PROJECT_ROOT}/vibe-coding/vibe-starter" ]]; then
-    fail "找不到 ./vibe-coding/vibe-starter，請從產品專案根目錄執行。"
+setup_project_paths() {
+  PROJECT_ROOT="$1"
+  WORKSPACE_DIR="${PROJECT_ROOT}/vibe-coding"
+  SPECS_DIR="${WORKSPACE_DIR}/specs"
+  HANDOFF_DIR="${WORKSPACE_DIR}/handoff"
+  MILESTONES_DIR="${WORKSPACE_DIR}/milestones"
+  MILESTONE_TASKS_DIR="${MILESTONES_DIR}/tasks"
+  FEATURES_DIR="${WORKSPACE_DIR}/features"
+  LAYOUTS_DIR="${WORKSPACE_DIR}/layouts"
+  UI_DIR="${WORKSPACE_DIR}/ui"
+  PROTOTYPES_DIR="${WORKSPACE_DIR}/prototypes"
+  REPORTS_DIR="${WORKSPACE_DIR}/reports"
+  REPORT_DATA_DIR="${REPORTS_DIR}/data"
+  REPORT_HTML_DIR="${REPORTS_DIR}/html"
+  NOTES_DIR="${WORKSPACE_DIR}/notes"
+}
+
+validate_project_root() {
+  local candidate="$1"
+  local source_label="${2:-專案根目錄}"
+  local starter_in_candidate resolved_starter
+
+  [[ -d "${candidate}" ]] || fail "${source_label}不存在：${candidate}"
+
+  starter_in_candidate="${candidate}/vibe-coding/vibe-starter"
+  [[ -d "${starter_in_candidate}" ]] || \
+    fail "${source_label} ${candidate} 中找不到 vibe-coding/vibe-starter。"
+
+  resolved_starter="$(cd "${starter_in_candidate}" && pwd)"
+  [[ "${resolved_starter}" == "${STARTER_ROOT}" ]] || \
+    fail "${source_label} ${candidate} 中的 vibe-coding/vibe-starter 與目前執行的 vibe-starter (${STARTER_ROOT}) 不一致。"
+}
+
+resolve_project_root() {
+  local -a remaining=()
+  local explicit_root=""
+  local arg=""
+  local cwd_path cwd_starter inferred chosen answer custom_path
+
+  while [[ $# -gt 0 ]]; do
+    arg="$1"
+    case "${arg}" in
+      --project-root)
+        shift
+        [[ $# -gt 0 ]] || fail "--project-root 需要提供路徑參數。"
+        explicit_root="$1"
+        shift
+        ;;
+      --project-root=*)
+        explicit_root="${arg#--project-root=}"
+        shift
+        ;;
+      *)
+        remaining+=("${arg}")
+        shift
+        ;;
+    esac
+  done
+
+  STARTER_ARGS=()
+  if [[ ${#remaining[@]} -gt 0 ]]; then
+    STARTER_ARGS=("${remaining[@]}")
   fi
 
-  if [[ "$(cd "${PROJECT_ROOT}/vibe-coding/vibe-starter" && pwd)" != "${STARTER_ROOT}" ]]; then
-    fail "目前執行位置與腳本所在的 vibe-starter 不一致，請回到產品專案根目錄後重試。"
+  if [[ -n "${explicit_root}" ]]; then
+    validate_project_root "${explicit_root}" "--project-root"
+    PROJECT_ROOT="$(cd "${explicit_root}" && pwd)"
+    return 0
   fi
+
+  cwd_path="$(pwd)"
+  cwd_starter="${cwd_path}/vibe-coding/vibe-starter"
+  if [[ -d "${cwd_starter}" ]] && \
+     [[ "$(cd "${cwd_starter}" && pwd)" == "${STARTER_ROOT}" ]]; then
+    PROJECT_ROOT="${cwd_path}"
+    return 0
+  fi
+
+  inferred="$(cd "${STARTER_ROOT}/../.." && pwd)"
+
+  if [[ -t 0 ]]; then
+    print_line "目前不在專案根目錄。" >&2
+    print_line "依腳本位置推論出的專案根目錄為：" >&2
+    print_line "  ${inferred}" >&2
+    if read -r -p "是否使用此路徑？[Y/n/其他絕對路徑]: " answer; then
+      :
+    else
+      answer=""
+    fi
+    case "${answer}" in
+      ""|y|Y|yes|YES)
+        chosen="${inferred}"
+        ;;
+      n|N|no|NO)
+        if ! read -r -p "請輸入專案根目錄絕對路徑: " custom_path; then
+          fail "未提供專案根目錄路徑。"
+        fi
+        [[ -n "${custom_path}" ]] || fail "未提供專案根目錄路徑。"
+        chosen="${custom_path}"
+        ;;
+      *)
+        chosen="${answer}"
+        ;;
+    esac
+  else
+    chosen="${inferred}"
+  fi
+
+  validate_project_root "${chosen}" "解析到的專案根目錄"
+  PROJECT_ROOT="$(cd "${chosen}" && pwd)"
+}
+
+bootstrap_starter() {
+  resolve_project_root "$@"
+  setup_project_paths "${PROJECT_ROOT}"
 }
 
 ensure_dir() {
