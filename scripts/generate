@@ -30,6 +30,7 @@ FILE_KEYS=(
   "reports"
   "user_flows"
   "notes"
+  "debt"
 )
 
 ALIASES=(
@@ -56,6 +57,7 @@ ALIASES=(
   "report_layer"
   "steps"
   "implementation_notes"
+  "technical_debt"
 )
 
 MENU_LABELS=(
@@ -82,6 +84,7 @@ MENU_LABELS=(
   "Project Report 層"
   "步驟流程"
   "Implementation Notes 層"
+  "Technical Debt 層"
 )
 
 canonical_mode() {
@@ -118,6 +121,7 @@ canonical_key() {
     21|reports|report_layer) print_line "reports" ;;
     22|user_flows|steps) print_line "user_flows" ;;
     23|notes|implementation_notes) print_line "notes" ;;
+    24|debt|technical_debt) print_line "debt" ;;
     *) return 1 ;;
   esac
 }
@@ -238,6 +242,23 @@ generate_notes_layer() {
   done
 }
 
+generate_debt_layer() {
+  local files=(
+    "${STARTER_ROOT}/templates/vibe-coding/debt/README.md|${DEBT_DIR}/README.md"
+    "${STARTER_ROOT}/templates/vibe-coding/debt/debt-register.md|${DEBT_DIR}/debt-register.md"
+  )
+  local mapping source_path target_path summary
+
+  ensure_dir "${DEBT_DIR}"
+
+  for mapping in "${files[@]}"; do
+    source_path="${mapping%%|*}"
+    target_path="${mapping#*|}"
+    copy_template_with_conflict_policy "${source_path}" "${target_path}" summary
+    GENERATED_SUMMARY+=("${summary}")
+  done
+}
+
 list_available_files() {
   local i=0
   print_line "可生成的文件如下：" >&2
@@ -331,6 +352,11 @@ run_generation() {
     return 0
   fi
 
+  if [[ "${key}" == "debt" ]]; then
+    generate_debt_layer
+    return 0
+  fi
+
   source_path="$(template_path_for "${key}")"
   target_path="$(target_path_for "${key}")"
 
@@ -362,6 +388,7 @@ main() {
   ensure_dir "${REPORT_DATA_DIR}"
   ensure_dir "${REPORT_HTML_DIR}"
   ensure_dir "${NOTES_DIR}"
+  ensure_dir "${DEBT_DIR}"
 
   while IFS= read -r selected; do
     [[ -n "${selected}" ]] || continue
@@ -378,6 +405,8 @@ main() {
     print_line "下一步建議：當需要查看目前專案狀態時，請使用「指令：專案報告」，或執行 bash ./vibe-coding/vibe-starter/scripts/report --open。"
   elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'notes/implementation-notes\|notes/README'; then
     print_line "下一步建議：實作中若需記錄詮釋、偏離、取捨、未決問題或驗證狀況，請更新 vibe-coding/notes/implementation-notes.md；進度與下一步請仍以 vibe-coding/milestones/ 為準。"
+  elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'debt/debt-register\|debt/README'; then
+    print_line "下一步建議：實作中若為了當下選擇刻意留下未來代價，請更新 vibe-coding/debt/debt-register.md；spec 詮釋仍寫在 vibe-coding/notes/implementation-notes.md。"
   elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'layouts\|design-system'; then
     print_line "下一步建議：先確認技術決策與是否需要 UI/UX Designer 協助，再整理 vibe-coding/ui/design-system.md 與 vibe-coding/layouts/index.md。"
   elif printf '%s\n' "${GENERATED_SUMMARY[@]}" | grep -q 'milestones'; then

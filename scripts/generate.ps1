@@ -26,7 +26,8 @@ $FileKeys = @(
   "prototypes",
   "reports",
   "user_flows",
-  "notes"
+  "notes",
+  "debt"
 )
 
 $Aliases = @(
@@ -52,7 +53,8 @@ $Aliases = @(
   "prototype_layer",
   "report_layer",
   "steps",
-  "implementation_notes"
+  "implementation_notes",
+  "technical_debt"
 )
 
 $MenuLabels = @(
@@ -78,7 +80,8 @@ $MenuLabels = @(
   "Prototype 層",
   "Project Report 層",
   "步驟流程",
-  "Implementation Notes 層"
+  "Implementation Notes 層",
+  "Technical Debt 層"
 )
 
 function Get-CanonicalMode {
@@ -168,6 +171,9 @@ function Get-CanonicalKey {
     "23" { return "notes" }
     "notes" { return "notes" }
     "implementation_notes" { return "notes" }
+    "24" { return "debt" }
+    "debt" { return "debt" }
+    "technical_debt" { return "debt" }
     default { return $null }
   }
 }
@@ -322,6 +328,28 @@ function New-NotesLayerOutputs {
   return $summaries
 }
 
+function New-DebtLayerOutputs {
+  $files = @(
+    @{
+      Source = Join-Path $Script:StarterRoot "templates\vibe-coding\debt\README.md"
+      Target = Join-Path $Script:DebtDir "README.md"
+    },
+    @{
+      Source = Join-Path $Script:StarterRoot "templates\vibe-coding\debt\debt-register.md"
+      Target = Join-Path $Script:DebtDir "debt-register.md"
+    }
+  )
+
+  Ensure-Dir $Script:DebtDir
+
+  $summaries = @()
+  foreach ($file in $files) {
+    $summaries += Copy-TemplateWithConflictPolicy -SourcePath $file.Source -TargetPath $file.Target
+  }
+
+  return $summaries
+}
+
 function Show-AvailableFiles {
   [Console]::Error.WriteLine("可生成的文件如下：")
   for ($i = 0; $i -lt $FileKeys.Count; $i++) {
@@ -407,6 +435,7 @@ try {
   Ensure-Dir $Script:ReportDataDir
   Ensure-Dir $Script:ReportHtmlDir
   Ensure-Dir $Script:NotesDir
+  Ensure-Dir $Script:DebtDir
 
   $starterArgs = $Script:StarterArgs
   $mode = if ($starterArgs.Count -gt 0) { [string]$starterArgs[0] } else { "" }
@@ -438,6 +467,11 @@ try {
       continue
     }
 
+    if ($key -eq "debt") {
+      $generatedSummary += New-DebtLayerOutputs
+      continue
+    }
+
     $generatedSummary += Copy-TemplateWithConflictPolicy `
       -SourcePath (Get-TemplatePath $key) `
       -TargetPath (Get-TargetPath $key)
@@ -453,6 +487,8 @@ try {
     Write-Line "下一步建議：當需要查看目前專案狀態時，請使用「指令：專案報告」，或執行 bash ./vibe-coding/vibe-starter/scripts/report --open。"
   } elseif ($generatedSummary | Where-Object { $_ -match "notes[\\/](implementation-notes|README)" }) {
     Write-Line "下一步建議：實作中若需記錄詮釋、偏離、取捨、未決問題或驗證狀況，請更新 vibe-coding/notes/implementation-notes.md；進度與下一步請仍以 vibe-coding/milestones/ 為準。"
+  } elseif ($generatedSummary | Where-Object { $_ -match "debt[\\/](debt-register|README)" }) {
+    Write-Line "下一步建議：實作中若為了當下選擇刻意留下未來代價，請更新 vibe-coding/debt/debt-register.md；spec 詮釋仍寫在 vibe-coding/notes/implementation-notes.md。"
   } elseif ($generatedSummary | Where-Object { $_ -match "layouts|design-system" }) {
     Write-Line "下一步建議：先確認技術決策與是否需要 UI/UX Designer 協助，再整理 vibe-coding/ui/design-system.md 與 vibe-coding/layouts/index.md。"
   } elseif ($generatedSummary | Where-Object { $_ -match "milestones" }) {
