@@ -24,6 +24,7 @@ $Script:ReportsDir = ""
 $Script:ReportDataDir = ""
 $Script:ReportHtmlDir = ""
 $Script:NotesDir = ""
+$Script:DebtDir = ""
 $Script:StarterArgs = @()
 
 function Write-Line {
@@ -64,6 +65,7 @@ function Set-ProjectPaths {
   $Script:ReportDataDir = Join-Path $Script:ReportsDir "data"
   $Script:ReportHtmlDir = Join-Path $Script:ReportsDir "html"
   $Script:NotesDir = Join-Path $Script:WorkspaceDir "notes"
+  $Script:DebtDir = Join-Path $Script:WorkspaceDir "debt"
 }
 
 function Test-ProjectRootCandidate {

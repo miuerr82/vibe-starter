@@ -22,6 +22,7 @@ REPORTS_DIR=""
 REPORT_DATA_DIR=""
 REPORT_HTML_DIR=""
 NOTES_DIR=""
+DEBT_DIR=""
 STARTER_ARGS=()
 
 print_line() {
@@ -48,6 +49,7 @@ setup_project_paths() {
   REPORT_DATA_DIR="${REPORTS_DIR}/data"
   REPORT_HTML_DIR="${REPORTS_DIR}/html"
   NOTES_DIR="${WORKSPACE_DIR}/notes"
+  DEBT_DIR="${WORKSPACE_DIR}/debt"
 }
 
 validate_project_root() {

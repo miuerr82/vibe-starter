@@ -21,6 +21,7 @@
 - 預設 project report source 為 `vibe-coding/reports/data/project-state.yml` 與 `vibe-coding/reports/current-status.md`
 - 預設 project report dashboard 為 `vibe-coding/reports/html/index.html`
 - 預設 implementation notes 檔案為 `vibe-coding/notes/implementation-notes.md`
+- 預設 technical debt 註冊檔案為 `vibe-coding/debt/debt-register.md`
 - starter launcher 會自動解析專案根目錄，因此不再強制要求從專案根目錄執行；必要時可加 `--project-root <path>` 明確指定根目錄
 
 ## 工作原則
@@ -94,7 +95,9 @@
 - 若是舊專案，先判斷這次修改是否只屬於純技術性、小範圍且不改行為的調整
 - 若會影響行為、流程、規則、狀態或物件責任，先補最小必要 spec，再進入實作
 - 每次只處理一個 task
-- 每段工作階段完成後，若已完成或暫停 1 個以上 milestone 或 task，應詢問使用者是否要整理 handoff
+- 每段工作階段完成後，若已完成或暫停 1 個以上 milestone 或 task，應先進行 Consolidated Recording Review，再詢問使用者是否要整理 handoff
+- Consolidated Recording Review 一次性檢視本次是否產生需要記錄的 debt、implementation notes、decision、handoff 未解項；沒有候選項的層應明示「無」，不可建立空 placeholder 條目
+- Consolidated Recording Review 的候選項應一次列出供使用者逐項 accept / edit / skip，不可分層多次詢問
 - 使用者第一次要求 `記錄進度`、`記錄交接進度` 或等價要求時，應先解析 handoff 位置；若 `AGENTS.md` 沒有明確定義，先找 `vibe-coding/handoff/`，不可先自行發明其他資料夾
 - 若使用者同意記錄 handoff，應整理完成內容、目前狀態、下一步與風險後寫入 handoff
 - `handoff` 記錄完成後，若仍有未完成的 `tasks in milestone`，再詢問使用者要繼續或停止
@@ -139,6 +142,8 @@
   - `vibe-coding/handoff/`
   - `vibe-coding/prototypes/`
   - `vibe-coding/ui/design-system.md`
+  - `vibe-coding/notes/`
+  - `vibe-coding/debt/`
   - `vibe-coding/reports/data/project-state.yml`
   - `vibe-coding/reports/current-status.md`
 - 觀察到的項目不可自動變成 task；應先分類為 context、decision、future option、milestone、task、validation、risk 或 handoff
@@ -172,6 +177,20 @@
 - 不可在 `vibe-coding/notes/implementation-notes.md` 中記錄進度或下一步；進度以 `vibe-coding/milestones/` 為準，交接以 `vibe-coding/handoff/` 為準
 - 若 `deviation` 或 `open question` 已被解決，應建議把結論回寫到對應 `vibe-coding/specs/` 檔案或 `vibe-coding/specs/decisions.md`，並在 notes 中標示 resolved 與引用位置
 - 預設使用單一 rolling 檔；只有在 milestone 實作量極大、需要獨立追蹤時，才額外建立 `vibe-coding/notes/<milestone-id>.md`
+
+## Technical Debt
+
+- 實作過程中應持續維護 `vibe-coding/debt/debt-register.md`，記錄當下為了選擇刻意留下的未來代價（shortcut、workaround、deferred_refactor、missing_test、hardcoded_value、dependency_pin、duplicate_logic、scaling_limit、compliance_gap 等）
+- 不要把 implementation notes 的 tradeoff 與本檔案的 debt 混用：沒有未來代價的取捨記在 notes，必須回收或明確 waive 的未來代價記在 debt；同一筆取捨不應跨兩層記錄
+- 提案 refactor、最佳化或範圍擴張前，應先檢查 `vibe-coding/debt/debt-register.md`，避免動到已知 debt 區域時忽略既有代價
+- 每筆 debt 必填 `reason_left`、`cost_of_not_paying`，並至少填寫 `payback_trigger` 或 `payback_window` 其中之一（兩者不可同時空白）
+- 每筆 debt 必填 `accepted_by`，明確標示誰知情並承擔
+- waived debt 必填 `review_condition`，避免靜默變成永久接受
+- 任何 milestone / task 若產生新的 debt，應在該 milestone / task 的 `incurred_debt_refs` 引用對應 `debt_id`；任何 milestone / task 為了償還 debt 而存在，應在 `paying_back_debt_refs` 引用對應 `debt_id`
+- 任何 technical decision 或 project decision 若知情接受未來代價，應在該決策的 `incurred_debt_refs` 引用對應 `debt_id`，不可只把代價寫在決策的 `consequences` 或 `result` 欄位
+- handoff 記錄必須包含 `open_debt_summary` 與 `scheduled_debt_summary`，避免下個 session 看不到已接受的代價
+- debt 被 `paid` 時，應回寫到對應 `vibe-coding/specs/` 檔案或 `vibe-coding/specs/decisions.md`，並在 `resolution_summary` 引用 spec 變更位置；debt 條目本身保留為歷史紀錄
+- 已解決、棄用、被取代的 debt 條目（`paid` / `waived` / `superseded`）應保留為歷史紀錄，不刪除
 
 ## 起手引導
 
