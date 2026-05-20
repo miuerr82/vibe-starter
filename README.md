@@ -127,6 +127,7 @@ Windows cmd：
 - `vibe-coding/prototypes/` 下的 prototype 探索與決策模板
 - `vibe-coding/reports/` 下的 project report source 與 HTML dashboard 模板
 - `vibe-coding/notes/` 下的 implementation notes 模板
+- `vibe-coding/debt/` 下的 technical debt 註冊表模板
 
 ## 這個專案的用途
 
@@ -141,6 +142,7 @@ Windows cmd：
    - 在 `vibe-coding/` 下生成 spec、handoff、milestone、feature、layout、UI contract 與 prototype 模板
    - 在 `vibe-coding/reports/` 下生成 project report source 與 dashboard 模板
    - 在 `vibe-coding/notes/` 下生成 implementation notes 模板
+   - 在 `vibe-coding/debt/` 下生成 technical debt 註冊表模板
    - 協助專案快速進入 spec-driven 工作方式
 
 3. `report`
@@ -224,6 +226,8 @@ Windows cmd：
 - `vibe-coding/reports/html/index.html`
 - `notes/README.md`
 - `notes/implementation-notes.md`
+- `debt/README.md`
+- `debt/debt-register.md`
 - 可選：`specs/user_flows.md`
 
 這些文件的模板都位於：
@@ -237,6 +241,7 @@ Windows cmd：
 - `templates/vibe-coding/prototypes/`
 - `templates/reports/`
 - `templates/vibe-coding/notes/`
+- `templates/vibe-coding/debt/`
 
 ## `generate` 使用方式
 
@@ -319,6 +324,7 @@ bash ./vibe-coding/vibe-starter/scripts/generate all
 - `21` / `reports` / `report_layer`
 - `22` / `user_flows` / `steps`
 - `23` / `notes` / `implementation_notes`
+- `24` / `debt` / `technical_debt`
 
 ## `report` 使用方式
 
@@ -412,10 +418,12 @@ HTML 是靜態 snapshot。若專案狀態之後改變，請重新使用 `指令�
    - 若 spec、文件、實作不一致，先指出並補齊
    - spec 明確後再進入實作
 
-4. 工作階段完成後詢問是否記錄 `handoff`
-   - 每段工作階段完成後，若已完成或暫停 1 個以上 milestone 或 task，先詢問是否整理 handoff
+4. 工作階段完成後做 Consolidated Recording Review，再決定是否記錄 `handoff`
+   - 每段工作階段完成後，若已完成或暫停 1 個以上 milestone 或 task，先做 Consolidated Recording Review：一次性檢視本次是否產生需要記錄的 debt、implementation notes、decision、handoff 未解項
+   - 沒有候選項的層應明示「無」，不可建立空 placeholder 條目
+   - 候選項應一次列出供使用者逐項 accept / edit / skip，不可分層多次詢問
    - 使用者第一次要求 `記錄進度` 或 `記錄交接進度` 時，先解析 handoff 位置；若 `AGENTS.md` 沒有明確定義，先找 `vibe-coding/handoff/`
-   - `handoff` 應記錄本次完成內容、目前狀態、下一步建議或待處理項目
+   - `handoff` 應記錄本次完成內容、目前狀態、下一步建議或待處理項目，並包含 `open_debt_summary` 與 `scheduled_debt_summary` 摘錄
 
 5. feature 討論先放在獨立區域
    - feature 討論未轉成正式 spec 前，先放在 `vibe-coding/features/`
@@ -681,6 +689,50 @@ Implementation notes 層用來記錄「實作如何詮釋 spec」，是給未來
 - 不可在 notes 中記錄進度或下一步；進度以 `vibe-coding/milestones/` 為準，交接以 `vibe-coding/handoff/` 為準
 - 若 `deviation` 或 `open_question` 已被解決，應建議把結論回寫到 `vibe-coding/specs/` 或 `vibe-coding/specs/decisions.md`，並在 notes 中標示 resolved 與引用位置
 - 已寫入的條目保留作為歷史紀錄，不要刪除
+
+## Technical Debt Layer
+
+Technical Debt 層用來記錄「為了當下選擇刻意留下的未來代價」，不是進度日誌，也不是 spec 詮釋。
+
+主要檔案：
+
+- `vibe-coding/debt/README.md`
+- `vibe-coding/debt/debt-register.md`
+
+每筆 debt 條目應宣告 `debt_type`：
+
+- `shortcut`
+- `workaround`
+- `deferred_refactor`
+- `missing_test`
+- `hardcoded_value`
+- `dependency_pin`
+- `duplicate_logic`
+- `scaling_limit`
+- `compliance_gap`
+- `other`
+
+狀態機：
+
+- `proposed`：剛提出，尚未確認
+- `accepted`：已知情並承擔
+- `scheduled`：已連到 milestone / task 預計回收
+- `paying_back`：回收中
+- `paid`：已回收完成
+- `waived`：明確不回收，必須記 `review_condition`
+- `superseded`：被新條目取代
+
+工作方式：
+
+- 每筆 debt 必填 `reason_left`、`cost_of_not_paying`，並至少填寫 `payback_trigger` 或 `payback_window` 其中之一（兩者不可同時空白）
+- 每筆 debt 必填 `accepted_by`
+- waived debt 必填 `review_condition`，避免靜默變成永久接受
+- 沒有未來代價的取捨記在 `vibe-coding/notes/implementation-notes.md` 的 `tradeoff` 類型；有未來代價的記在本層，不可跨兩層重複記
+- 任何 milestone / task 若產生新的 debt，應在該 milestone / task 的 `incurred_debt_refs` 引用對應 `debt_id`
+- 任何 milestone / task 為了償還 debt 而存在，應在 `paying_back_debt_refs` 引用對應 `debt_id`
+- 任何 decision 若知情接受未來代價，應在該決策的 `incurred_debt_refs` 引用對應 `debt_id`
+- 已解決、棄用、被取代的 debt 條目（`paid` / `waived` / `superseded`）應保留為歷史紀錄，不刪除
+- debt 被 `paid` 時應回寫對應 spec 或 `decisions.md`，並在 `resolution_summary` 引用 spec 變更位置
 
 ## Claude Skills
 
