@@ -22,6 +22,11 @@ execution_view:
 risk_view:
   risks: []
 
+debt_view:
+  open_debt: []
+  scheduled_debt: []
+  recently_paid_debt: []
+
 activity_view:
   agent_activity: []
   human_activity: []

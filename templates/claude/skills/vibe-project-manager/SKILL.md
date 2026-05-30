@@ -108,7 +108,8 @@ actual_duration | elapsed_calendar_duration | tasks_file_path
 ```
 task_id | status | title | dependency_task_ids | blocker_summary |
 manual_pending | started_at | completed_at | actual_duration |
-elapsed_calendar_duration | completion_evidence
+elapsed_calendar_duration | completion_evidence |
+incurred_debt_ref | paying_back_debt_ref
 ```
 
 **時間戳與時長規則**（與 4.1 一致）：
@@ -204,6 +205,11 @@ PM 整理 handoff 時固定使用此結構：
 - 已知風險
 - 待使用者決策的項目
 - 與其他 milestone 的衝突
+
+## 已知技術債（open / scheduled）
+
+- open_debt_summary：列出仍未償還的 debt（debt_id + 一句話）
+- scheduled_debt_summary：列出已排入 milestone / task 預計償還的 debt
 
 ## 下次接手要先讀的檔案
 

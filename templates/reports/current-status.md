@@ -27,6 +27,12 @@
 
 - Risks：
 
+## Technical Debt
+
+- Open debt：
+- Scheduled debt：
+- Recently paid debt：
+
 ## Activity View
 
 - Agent activity：
