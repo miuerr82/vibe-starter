@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source "$(cd "$(dirname "$0")" && pwd)/lib/common.sh"
+
+CANONICAL_REPO_URL="https://github.com/miuerr82/vibe-starter.git"
+TAGS_API_URL="https://api.github.com/repos/miuerr82/vibe-starter/tags"
+ARCHIVE_BASE_URL="https://github.com/miuerr82/vibe-starter/archive/refs/tags"
+
+SYNC_BEFORE=""
+SYNC_AFTER=""
+SYNC_METHOD=""
+SYNC_CHANGED="false"
+
+have_cmd() {
+  command -v "$1" >/dev/null 2>&1
+}
+
+is_git_clone() {
+  have_cmd git && git -C "${STARTER_ROOT}" rev-parse --is-inside-work-tree >/dev/null 2>&1
+}
+
+current_version() {
+  if is_git_clone; then
+    git -C "${STARTER_ROOT}" rev-parse --short HEAD 2>/dev/null || print_line "unknown"
+  else
+    print_line "unknown"
+  fi
+}
+
+download_to() {
+  local url="$1"
+  local dest="$2"
+  if have_cmd curl; then
+    curl -fsSL "${url}" -o "${dest}"
+  elif have_cmd wget; then
+    wget -q "${url}" -O "${dest}"
+  else
+    return 1
+  fi
+}
+
+fetch_latest_tag() {
+  local tmp="$1"
+  download_to "${TAGS_API_URL}" "${tmp}" || return 1
+  # extract the first "name" field from the tags API response
+  grep -oE '"name"[[:space:]]*:[[:space:]]*"[^"]+"' "${tmp}" \
+    | head -n 1 \
+    | sed -E 's/.*"name"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/'
+}
+
+sync_via_git() {
+  local before after
+  before="$(git -C "${STARTER_ROOT}" rev-parse --short HEAD)"
+
+  if [[ -n "$(git -C "${STARTER_ROOT}" status --porcelain)" ]]; then
+    fail "starter 工具目錄有本地修改，sync 不會覆寫。請先處理 ${STARTER_ROOT} 的變更後再試。專案內容未變動。"
+  fi
+
+  if ! git -C "${STARTER_ROOT}" pull --ff-only origin >/dev/null 2>&1; then
+    if ! git -C "${STARTER_ROOT}" pull --ff-only >/dev/null 2>&1; then
+      fail "git 更新失敗（可能是網路問題或無法 fast-forward）。starter 工具與專案內容皆未變動。"
+    fi
+  fi
+
+  after="$(git -C "${STARTER_ROOT}" rev-parse --short HEAD)"
+  SYNC_BEFORE="${before}"
+  SYNC_AFTER="${after}"
+  SYNC_METHOD="git pull --ff-only"
+  if [[ "${before}" != "${after}" ]]; then
+    SYNC_CHANGED="true"
+  fi
+}
+
+sync_via_archive() {
+  local tmp_root tag tarball extracted_dir
+  tmp_root="$(mktemp -d)"
+  trap 'rm -rf "${tmp_root}"' RETURN
+
+  if ! have_cmd curl && ! have_cmd wget; then
+    fail "找不到 git，也找不到 curl / wget，無法下載最新版。請手動更新 ${STARTER_ROOT}。專案內容未變動。"
+  fi
+  if ! have_cmd tar; then
+    fail "找不到 tar，無法解壓最新版。請手動更新 ${STARTER_ROOT}。專案內容未變動。"
+  fi
+
+  tag="$(fetch_latest_tag "${tmp_root}/tags.json")" || true
+  [[ -n "${tag}" ]] || fail "無法判斷最新版本標籤（tags API 取得失敗）。專案內容未變動。"
+
+  tarball="${tmp_root}/starter.tar.gz"
+  download_to "${ARCHIVE_BASE_URL}/${tag}.tar.gz" "${tarball}" \
+    || fail "下載版本 ${tag} 失敗。專案內容未變動。"
+
+  tar -xzf "${tarball}" -C "${tmp_root}" \
+    || fail "解壓版本 ${tag} 失敗。專案內容未變動。"
+
+  extracted_dir="$(find "${tmp_root}" -maxdepth 1 -type d -name 'vibe-starter-*' | head -n 1)"
+  [[ -n "${extracted_dir}" ]] || fail "解壓內容結構不符預期。專案內容未變動。"
+
+  SYNC_BEFORE="$(current_version)"
+
+  # refresh ONLY the starter tool directory; never touch anything outside STARTER_ROOT
+  shopt -s dotglob nullglob
+  cp -R "${extracted_dir}"/* "${STARTER_ROOT}/"
+  shopt -u dotglob nullglob
+
+  SYNC_AFTER="${tag}"
+  SYNC_METHOD="archive download (${tag})"
+  SYNC_CHANGED="true"
+}
+
+main() {
+  if is_git_clone; then
+    sync_via_git
+  else
+    sync_via_archive
+  fi
+
+  if [[ "${SYNC_CHANGED}" == "true" ]]; then
+    print_summary "同步完成。starter 工具已更新，專案內容未變動。" \
+      "更新方式: ${SYNC_METHOD}" \
+      "原版本: ${SYNC_BEFORE}" \
+      "新版本: ${SYNC_AFTER}" \
+      "工具位置: ${STARTER_ROOT}"
+    print_line "下一步建議：可執行 generate 檢視是否有新增的模板檔（不會自動覆寫既有內容）。"
+  else
+    print_line "starter 工具已是最新版，無需更新。"
+    print_line "目前版本: ${SYNC_AFTER:-${SYNC_BEFORE}}（${SYNC_METHOD}）"
+  fi
+}
+
+bootstrap_starter "$@"
+main "${STARTER_ARGS[@]:-}"

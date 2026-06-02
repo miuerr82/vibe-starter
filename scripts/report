@@ -275,6 +275,7 @@ main_panels = [
     yaml_panel("execution_view", "Milestone Progress", panel_id="milestone-progress"),
     panel("Pending Validations", f"<pre>{escape(execution_block)}</pre>", panel_id="pending-validations"),
     yaml_panel("risk_view", "Risks", panel_id="risks"),
+    yaml_panel("debt_view", "Technical Debt", panel_id="technical-debt"),
     yaml_panel("activity_view", "Recent Handoffs & Activity", panel_id="recent-handoffs-activity"),
     panel("Current Status Markdown", status_html, panel_id="current-status"),
     panel("Project State YAML", f"<pre>{escape(state_text)}</pre>", panel_id="project-state-yaml"),

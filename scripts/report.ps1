@@ -355,6 +355,7 @@ function Render-Dashboard {
     New-YamlPanel -Name "execution_view" -Title "Milestone Progress" -Id "milestone-progress" -StateText $stateText
     New-Panel -Title "Pending Validations" -Id "pending-validations" -Body "<pre>$(ConvertTo-HtmlText $executionBlock)</pre>"
     New-YamlPanel -Name "risk_view" -Title "Risks" -Id "risks" -StateText $stateText
+    New-YamlPanel -Name "debt_view" -Title "Technical Debt" -Id "technical-debt" -StateText $stateText
     New-YamlPanel -Name "activity_view" -Title "Recent Handoffs & Activity" -Id "recent-handoffs-activity" -StateText $stateText
     New-Panel -Title "Current Status Markdown" -Id "current-status" -Body (Convert-MarkdownToHtml $statusText)
     New-Panel -Title "Project State YAML" -Id "project-state-yaml" -Body "<pre>$(ConvertTo-HtmlText $stateText)</pre>"
