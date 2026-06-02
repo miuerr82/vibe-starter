@@ -9,19 +9,22 @@ $Script:ClaudeSkillsDir = ""
 $SkillKeys = @(
   "spec-driven-consultant",
   "vibe-uiux-designer",
-  "vibe-project-manager"
+  "vibe-project-manager",
+  "vibe-recording-keeper"
 )
 
 $Aliases = @(
   "spec",
   "uiux",
-  "pm"
+  "pm",
+  "rec"
 )
 
 $MenuLabels = @(
   "Spec-driven 需求顧問",
   "UI/UX Designer",
-  "Project Manager"
+  "Project Manager",
+  "Recording Keeper（記錄複查）"
 )
 
 function Get-CanonicalMode {
@@ -51,6 +54,10 @@ function Get-CanonicalSkill {
     "3" { return "vibe-project-manager" }
     "vibe-project-manager" { return "vibe-project-manager" }
     "pm" { return "vibe-project-manager" }
+    "4" { return "vibe-recording-keeper" }
+    "vibe-recording-keeper" { return "vibe-recording-keeper" }
+    "rec" { return "vibe-recording-keeper" }
+    "recording" { return "vibe-recording-keeper" }
     default { return $null }
   }
 }

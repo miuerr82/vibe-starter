@@ -757,6 +757,7 @@ bash ./vibe-coding/vibe-starter/scripts/install-skill
 - `spec-driven-consultant`
 - `vibe-uiux-designer`
 - `vibe-project-manager`
+- `vibe-recording-keeper`（收尾時的合併記錄複查：debt / notes / decisions / handoff）
 
 安裝位置：
 
