@@ -389,6 +389,31 @@ HTML 是靜態 snapshot。若專案狀態之後改變，請重新使用 `指令�
 - `vibe-coding/reports/html/index.html` 顯示 `source_summarized_at`
 - `vibe-coding/reports/html/index.html` 顯示 `generated_at`
 
+## 升級 starter 工具（sync）
+
+當 `vibe-starter` 模板有更新時，可在既有專案中用 `sync` 把 `vibe-coding/vibe-starter` 工具升級到新版。
+
+```bash
+bash ./vibe-coding/vibe-starter/scripts/sync
+```
+
+```powershell
+.\vibe-coding\vibe-starter\scripts\sync.ps1
+```
+
+```cmd
+.\vibe-coding\vibe-starter\scripts\sync.cmd
+```
+
+行為與安全邊界：
+
+- `sync` 只升級 `vibe-coding/vibe-starter` 工具目錄本身，**不會**修改、覆寫或刪除該目錄以外的任何檔案
+- 不會動到你在 `vibe-coding/` 下的 spec、handoff、milestones、features、reports、notes、debt 等內容
+- 若 `vibe-coding/vibe-starter` 是 git clone（預設），以 `git pull --ff-only` 更新；工具目錄若有本地修改會先中止，不覆寫
+- 若沒有 `git`，則從 GitHub tags 下載最新版，只替換工具目錄（需要 `curl`/`wget` 與 `tar`）
+- 已是最新版時會回報「無需更新」，不會失敗
+- 升級後若想看是否有新增的模板檔，再自行執行 `generate`（`generate` 也不會自動覆寫既有內容）
+
 ## 初始化後的工作流程
 
 執行完 `init` 與 `generate` 之後，日常工作建議照這個順序進行：
