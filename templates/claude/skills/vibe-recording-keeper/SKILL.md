@@ -14,7 +14,7 @@ description: 在 vibe-coding 工作流中扮演 Recording Keeper 角色，於工
   1. **Technical Debt**（技術債）→ `vibe-coding/debt/debt-register.md`
   2. **Implementation Notes**（實作詮釋筆記）→ `vibe-coding/notes/implementation-notes.md`
   3. **Technical / Project Decisions**（決策）→ `vibe-coding/specs/decisions.md`
-  4. **Handoff**（交接）→ `vibe-coding/handoff/YYYY-MM-DD-<topic>.md`
+  4. **Handoff**（交接）→ `vibe-coding/handoff/<YYYYMMDD>-<人員代號>[-<n>]-<topic>.md`
 - 把候選條目**在同一個提示裡一起提議**，由使用者逐條確認、修改或略過
 - 沒有內容的層也明確標示「無候選」，讓「沒東西要記」這件事是可見的，而不是被忽略
 
@@ -164,7 +164,7 @@ description: 在 vibe-coding 工作流中扮演 Recording Keeper 角色，於工
 - 討論過程歷史可留在 `vibe-coding/features/`；這裡只留收斂後的決策
 - 若某決策知情地接受了未來成本 → 在決策裡用 `incurred_debt_refs` 連到對應 debt 條目，**不要**把成本只藏在 consequences / result 欄位
 
-### 5.4 Handoff（`vibe-coding/handoff/YYYY-MM-DD-<topic>.md`）
+### 5.4 Handoff（`vibe-coding/handoff/<YYYYMMDD>-<人員代號>[-<n>]-<topic>.md`）
 
 - 本 skill 只負責**偵測是否需要 handoff**並提議
 - 需要詳細整理（milestone/task 收尾、work_order 建議、固定結構）時，**交由 vibe-project-manager skill**

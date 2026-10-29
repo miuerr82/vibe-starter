@@ -27,6 +27,7 @@
 4. 最後固化 layout
    - 更新 `vibe-coding/layouts/index.md`
    - 必要時建立 `vibe-coding/layouts/<layout-id>.md`
+   - `layout_id` 格式為 `LAYOUT-<YYYYMMDD>-<人員代號>`，同一人同日第二個起加 `-2`、`-3`；不可使用流水號
 
 ## 不知道怎麼規劃時
 
@@ -70,7 +71,7 @@
 ## 範例
 
 ```md
-# LAYOUT-001 後台列表頁
+# LAYOUT-20260510-alice 後台列表頁
 
 ## 狀態
 

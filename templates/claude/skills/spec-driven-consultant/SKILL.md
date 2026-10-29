@@ -253,64 +253,66 @@ Acceptance 不是被寫出來的，而是從 Spec 推導出來的。
 
 | 類型 | ID 格式 | 範例 |
 |---|---|---|
-| 角色 | `ROLE-xxx` | `ROLE-001`（收銀員）|
-| 物件 | `OBJ-xxx` | `OBJ-001`（訂單）|
-| 行為 | `BEH-xxx` | `BEH-001`（結帳）|
-| 流程 | `FLOW-xxx` | `FLOW-001`（日結流程）|
-| 規則 | `RULE-xxx` | `RULE-001`（48hr 上傳）|
+| 角色 | `ROLE-<YYYYMMDD>-<人員代號>[-n]` | `ROLE-20260505-alice`（收銀員）|
+| 物件 | `OBJ-<YYYYMMDD>-<人員代號>[-n]` | `OBJ-20260505-alice`（訂單）|
+| 行為 | `BEH-<YYYYMMDD>-<人員代號>[-n]` | `BEH-20260505-alice`（結帳）|
+| 流程 | `FLOW-<YYYYMMDD>-<人員代號>[-n]` | `FLOW-20260505-alice`（日結流程）|
+| 規則 | `RULE-<YYYYMMDD>-<人員代號>[-n]` | `RULE-20260505-alice`（48hr 上傳）|
 
-- 大寫前綴 + hyphen + 3 位以上數字
-- 編號在該檔內遞增，不跨檔共用
+- 不使用流水號，避免多人或多個 branch 平行整理 spec 時撞號
+- 同一人同日同類第二個起加 `-2`、`-3`，例如 `BEH-20260505-alice-2`
+- 人員代號只能用小寫英文與數字、不可含 `-`；不知道時先詢問使用者，不可自行編造
+- ID 建立後不可修改或重新編號；既有流水號 ID（如 `ROLE-001`）保持有效
 - 中文名稱僅作顯示用，引用時一律用 ID
 ### 分檔輸出模板
 
 #### roles.md
 
 ```md
-## ROLE-001 收銀員
+## ROLE-20260505-alice 收銀員
 - Description: POS 端執行結帳動作的人
 - Scope: 單店、單班次
-- 相關行為: BEH-001, BEH-002
+- 相關行為: BEH-20260505-alice, BEH-20260505-alice-2
 ```
 
 #### objects.md
 
 ```md
-## OBJ-001 訂單
+## OBJ-20260505-alice 訂單
 - Definition: 一筆消費的完整紀錄
 - Attributes:
   - 訂單編號
   - 總金額
   - 建立時間
-- States: 見 states.md OBJ-001
-- 相關行為: BEH-001（建立）, BEH-003（取消）
+- States: 見 states.md OBJ-20260505-alice
+- 相關行為: BEH-20260505-alice（建立）, BEH-20260505-alice-3（取消）
 ```
 
 #### states.md
 
 ```md
-## OBJ-001 訂單
+## OBJ-20260505-alice 訂單
 - States:
   - draft（草稿）
   - checking_out（結帳中）
   - completed（已完成）
   - cancelled（已取消）
 - Transitions:
-  - draft → checking_out（觸發: BEH-001）
-  - checking_out → completed（觸發: BEH-002 成功）
-  - checking_out → cancelled（觸發: BEH-003）
+  - draft → checking_out（觸發: BEH-20260505-alice）
+  - checking_out → completed（觸發: BEH-20260505-alice-2 成功）
+  - checking_out → cancelled（觸發: BEH-20260505-alice-3）
 ```
 
-> State key 用 snake_case 英文，中文僅作對照；跨檔引用一律用 key（例如 `Pre-state: OBJ-001=draft`）。
+> State key 用 snake_case 英文，中文僅作對照；跨檔引用一律用 key（例如 `Pre-state: OBJ-20260505-alice=draft`）。
 
 #### behaviors.md
 
 ```md
-## BEH-001 結帳
-- Actor: ROLE-001
-- Target: OBJ-001
-- Pre-state: OBJ-001=draft
-- Post-state: OBJ-001=checking_out
+## BEH-20260505-alice 結帳
+- Actor: ROLE-20260505-alice
+- Target: OBJ-20260505-alice
+- Pre-state: OBJ-20260505-alice=draft
+- Post-state: OBJ-20260505-alice=checking_out
 - Result: 進入結帳流程
 - Related rules: <!-- 待補 -->
 ```
@@ -318,13 +320,13 @@ Acceptance 不是被寫出來的，而是從 Spec 推導出來的。
 #### flows.md
 
 ```md
-## FLOW-001 結帳到發票上傳
+## FLOW-20260505-alice 結帳到發票上傳
 - Goal: 完成一次消費並向財政部上傳發票
 - Steps:
-  1. BEH-001 結帳
-  2. BEH-002 開立發票
-  3. BEH-004 上傳發票到財政部
-- Related objects: OBJ-001, OBJ-002
+  1. BEH-20260505-alice 結帳
+  2. BEH-20260505-alice-2 開立發票
+  3. BEH-20260505-alice-4 上傳發票到財政部
+- Related objects: OBJ-20260505-alice, OBJ-20260505-alice-2
 ```
 
 > Flow step **只引用 BEH-id**（可加行為標題增加可讀性），不重新定義 role / object——actor 與 target 一律以 behaviors.md 為單一來源，避免兩處不一致。
@@ -332,12 +334,12 @@ Acceptance 不是被寫出來的，而是從 Spec 推導出來的。
 #### rules.md
 
 ```md
-## RULE-001 發票須於 48 小時內上傳
+## RULE-20260505-alice 發票須於 48 小時內上傳
 - Type: 時間規則
-- Applies to: OBJ-002
-- Trigger: BEH-002 完成後
-- Constraint: 必須在 48 小時內執行 BEH-004
-- Owner: ROLE-002
+- Applies to: OBJ-20260505-alice-2
+- Trigger: BEH-20260505-alice-2 完成後
+- Constraint: 必須在 48 小時內執行 BEH-20260505-alice-4
+- Owner: ROLE-20260505-alice-2
 - Failure handling: <!-- 待補 -->
 ```
 
@@ -345,7 +347,7 @@ Acceptance 不是被寫出來的，而是從 Spec 推導出來的。
 
 ```md
 ## 系統內部責任
-- 發票號段管理: ROLE-002
+- 發票號段管理: ROLE-20260505-alice-2
 - 上傳重試: 系統自動
 
 ## 外部系統依賴
@@ -359,10 +361,10 @@ Acceptance 不是被寫出來的，而是從 Spec 推導出來的。
 
 ```md
 ## 班結
-單一班次結束時的結算動作。對應 BEH-005。
+單一班次結束時的結算動作。對應 BEH-20260505-alice-5。
 
 ## 日結
-單一營業日結束時的結算動作。對應 BEH-006。
+單一營業日結束時的結算動作。對應 BEH-20260505-alice-6。
 不等於班結；一日可能含多班次。
 ```
 

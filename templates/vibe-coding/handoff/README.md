@@ -21,12 +21,17 @@
 - 發現仍有未完成風險時
 - 準備交由下一次對話或下一位協作者接續時
 
-## Handoff 位置解析
+## Handoff 位置
 
-- 若 `AGENTS.md` 已明確定義 handoff 路徑，優先使用該路徑
-- 若 `AGENTS.md` 未明確定義 handoff 路徑，第一次記錄進度前應先找 `vibe-coding/handoff/`
-- 不可在檢查明確路徑與 `vibe-coding/handoff/` 前，自行決定其他 handoff 資料夾
-- 若靠 fallback 找到 handoff 位置，應建議把該路徑補回 `AGENTS.md`
+- handoff 目錄固定為 `vibe-coding/handoff/`，不可由 `AGENTS.md` 或其他指示改成其他路徑
+- 目錄不存在時直接建立，不搜尋、也不改用其他資料夾
+
+## Handoff 檔名
+
+- 格式：`<YYYYMMDD>-<人員代號>[-<n>]-<topic>.md`
+- `<topic>` 使用 kebab-case
+- 同一人同日第二份起加 `-2`、`-3`，例如 `20261029-alice-2-auth-flow.md`
+- 人員代號規則與 `AGENTS.md` 的 ID 規則相同
 
 ## Handoff 提示方式
 
@@ -40,11 +45,12 @@
 
 ### 建議命名方式
 
-- `2026-04-22-initial-setup.md`
-- `2026-04-22-auth-flow-update.md`
+- `20260422-alice-initial-setup.md`
+- `20260422-alice-2-auth-flow-update.md`
 
 ### 每份 handoff 建議內容
 
+- 作者人員代號
 - 目前做到哪裡
 - 已完成什麼
 - 還缺什麼
@@ -74,22 +80,18 @@
 
 - 
 - 
-
-### Handoff 位置解析
-
-- 
-- 
 ```
 
 ## 正式資料
 
 ### 建議命名方式
 
-- 以日期加主題命名
+- 依 `<YYYYMMDD>-<人員代號>[-<n>]-<topic>.md` 命名
 - 檔名應能快速反映交接主題
 
 ### 每份 handoff 建議內容
 
+- 作者人員代號
 - 目前做到哪裡
 - 已完成什麼
 - 還缺什麼
@@ -103,7 +105,6 @@
 - 切換主題前
 - 結束工作前
 
-### Handoff 位置解析
+### Handoff 位置
 
-- 優先依 `AGENTS.md` 明確定義
-- 未明確定義時先找 `vibe-coding/handoff/`
+- 固定為 `vibe-coding/handoff/`

@@ -56,7 +56,7 @@ description: 在 vibe-coding 工作流中扮演 Project Manager 角色，協助�
 | 偵測到的情境 | PM 的動作 |
 |---|---|
 | 使用者描述了大於單一 task 的工作（例如「我想優化會員系統」） | 提議「要不要先拆成 milestone + tasks？」 |
-| 使用者完成了 task，明確說「T001 done / 完成」 | 自動更新 status、寫 `completed_at` |
+| 使用者完成了 task，明確說「T001-alice done / 完成」 | 自動更新 status、寫 `completed_at` |
 | 使用者完成了 milestone | 自動更新 milestone status |
 | 使用者要切換主題、結束工作 | 提議「要不要先記 handoff？」 |
 | 已完成或暫停 1 個以上 milestone / task | 提議「要不要整理 handoff？」 |
@@ -138,6 +138,15 @@ incurred_debt_ref | paying_back_debt_ref
 
 - 用 `dependency_task_ids` 記錄
 - 排 `work_order` 時要尊重依賴關係
+### 4.6 ID 規則（避免多人多工衝突）
+
+- milestone_id：`M-<YYYYMMDD>-<人員代號>`，同一人同日第二個起加 `-2`、`-3`，例如 `M-20260512-alice`、`M-20260512-alice-2`
+- task_id：`T<nnn>-<人員代號>`，在所屬 milestone 內依人員各自遞增，例如 `T001-alice`、`T001-bob`
+- task_id 只在所屬 tasks file 內唯一；跨檔引用（如 `manual_pending_task_refs`、layout 的 `related_tasks`）一律寫 `<milestone-id>/<task-id>`
+- 人員代號：小寫英文與數字、英文開頭、不可含 `-`；不知道時先詢問使用者（可依 git user 建議，但須確認），不可自行編造
+- 下一個 `-n` 依目前工作目錄中同 prefix、同日期、同人員的既有 ID 決定
+- ID 建立後不可修改或重新編號；順序一律由 `work_order` 表達
+- 舊有流水號（`M001`、`T001`）保持有效，新項目一律用新格式
 ## 5. Handoff 整理
 
 ### 5.1 觸發時機
@@ -152,21 +161,18 @@ incurred_debt_ref | paying_back_debt_ref
 
 - 「目前這段工作可以告一段落，要不要我整理 handoff？」
 - 「這個 milestone 已完成，要不要記錄交接？」
-### 5.2 Handoff 位置解析
+### 5.2 Handoff 位置
 
-依 `AGENTS.md` 規則：
-
-1. 若 `AGENTS.md` 已明確定義 handoff 路徑，優先使用
-2. 若未明確定義，先找 `vibe-coding/handoff/`
-3. 若靠 fallback 找到路徑，建議使用者把路徑補回 `AGENTS.md`
+- handoff 目錄固定為 `vibe-coding/handoff/`，不可由 `AGENTS.md` 或其他指示改成其他路徑
+- 目錄不存在時直接建立，不搜尋、也不改用其他資料夾
 ### 5.3 Handoff 檔案命名
 
-格式：`YYYY-MM-DD-<topic>.md`
+格式：`<YYYYMMDD>-<人員代號>[-<n>]-<topic>.md`
 
 範例：
-- `2026-05-12-postgresql-ha-setup.md`
-- `2026-05-12-member-system-redesign.md`
-`<topic>` 用 kebab-case，能快速反映交接主題。
+- `20260512-alice-postgresql-ha-setup.md`
+- `20260512-alice-2-member-system-redesign.md`（同一人同日第二份）
+`<topic>` 用 kebab-case，能快速反映交接主題。人員代號規則見第 4.6 節。
 
 ### 5.4 Handoff 內容結構
 
@@ -174,6 +180,8 @@ PM 整理 handoff 時固定使用此結構：
 
 ```markdown
 # Handoff: YYYY-MM-DD <topic>
+
+- author: <人員代號>
 
 ## 本次工作範圍
 
@@ -276,20 +284,20 @@ PM 整理 handoff 時固定使用此結構：
    - 有 → 引用既有 spec
    - 沒有 → 提議先回到需求討論階段
 3. 拆解 milestone：
-   - 給 milestone_id（建議下一個流水號）
+   - 給 milestone_id：`M-<YYYYMMDD>-<人員代號>`，同一人同日第二個起加 `-2`、`-3`（不可用流水號）
    - 給 title
    - 估計 work_order（在現有 milestones 中應排第幾）
    - status = `planned`
 4. 拆 task：
-   - 給每個 task 一個 task_id
+   - 給每個 task 一個 task_id：`T<nnn>-<人員代號>`，在該 milestone 內依人員各自遞增
    - 標 dependency_task_ids
    - status = `todo`
 5. 建立檔案：
    - 更新 `milestones/index.md`
    - 建立 `milestones/tasks/<milestone-id>.md`
-### 場景 B：使用者說「T001 完成」
+### 場景 B：使用者說「T001-alice 完成」
 
-1. 找到 T001 所在 milestone 與 tasks file
+1. 找到 T001-alice 所在 milestone 與 tasks file；若多個 milestone 都有同名 task，先請使用者指定 `<milestone-id>/<task-id>`
 2. 更新 task：
    - status: in_progress → done
    - completed_at: 當下時間
@@ -300,13 +308,13 @@ PM 整理 handoff 時固定使用此結構：
 ### 場景 C：使用者切換主題前
 
 1. 偵測切換意圖（「我現在想做別的」、「先停一下」）
-2. 提議：「目前 M001 還有 2 個 task 未完成，要不要先記 handoff？」
+2. 提議：「目前 M-20260512-alice 還有 2 個 task 未完成，要不要先記 handoff？」
 3. 若同意 → 依第 5.4 節結構整理
-4. 寫入 `handoff/YYYY-MM-DD-<topic>.md`
+4. 寫入 `vibe-coding/handoff/<YYYYMMDD>-<人員代號>[-<n>]-<topic>.md`
 ### 場景 D：使用者把 feature 變成 milestone
 
 1. **不自動轉**
-2. 詢問：「這個 feature（FEAT-001）已確認要轉入正式執行嗎？」
+2. 詢問：「這個 feature（FEAT-20260505-alice）已確認要轉入正式執行嗎？」
 3. 使用者確認後：
    - 在 `features/index.md` 更新 status 為 `accepted_for_spec` 或保留 `confirmed`
    - 在 `milestones/index.md` 新增 milestone entry

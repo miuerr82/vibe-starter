@@ -45,13 +45,13 @@
 
 | feature_id | status | title | prompt_priority | discussion_file | promoted_spec_refs | related_milestone_refs | updated_at |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| FEAT-001 | confirmed | 範例優化方向 | high | vibe-coding/features/FEAT-001.md | - | - | 2026-05-05 |
+| FEAT-20260505-alice | confirmed | 範例優化方向 | high | vibe-coding/features/FEAT-20260505-alice.md | - | - | 2026-05-05 |
 
 ### Brief Notes
 
 | note_id | title | prompt | updated_at |
 | --- | --- | --- | --- |
-| NOTE-001 | 範例短記錄 | 曾討論：範例短記錄。後續要討論 / 保留 / 棄用？ | 2026-05-05 |
+| NOTE-20260505-alice | 範例短記錄 | 曾討論：範例短記錄。後續要討論 / 保留 / 棄用？ | 2026-05-05 |
 
 ## 空白模板
 
