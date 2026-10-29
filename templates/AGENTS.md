@@ -111,7 +111,7 @@
 - 為避免多人多工衝突，新建 ID 不可使用全專案流水號
 - milestone、feature、layout、decision、report 項目、spec 元素的 ID 格式為 `<PREFIX>-<YYYYMMDD>-<人員代號>`；同一人同日同類第二個起加 `-2`、`-3`
   - 例：`M-20261029-alice`、`M-20261029-alice-2`、`FEAT-20261029-bob`
-- prefix：milestone `M`、feature `FEAT`、feature 短記錄 `NOTE`、layout `LAYOUT`、技術決策 `DEC`、report 觀察項目 `ITEM`、report 決策 `PDEC`、驗證 `VAL`、活動 `ACT`、工作階段 `SES`、spec 元素 `ROLE` / `OBJ` / `BEH` / `FLOW` / `RULE`
+- prefix：milestone `M`、feature `FEAT`、feature 短記錄 `NOTE`、技術債 `DEBT`、layout `LAYOUT`、技術決策 `DEC`、report 觀察項目 `ITEM`、report 決策 `PDEC`、驗證 `VAL`、活動 `ACT`、工作階段 `SES`、spec 元素 `ROLE` / `OBJ` / `BEH` / `FLOW` / `RULE`
 - task ID 格式為 `T<nnn>-<人員代號>`，`<nnn>` 為三位數，在所屬 milestone 內依人員各自遞增，例如 `T001-alice`
 - task ID 只在所屬 tasks file 內唯一；從其他檔案引用時必須寫成 `<milestone-id>/<task-id>`，例如 `M-20261029-alice/T001-bob`
 - 人員代號只能用小寫英文與數字、以英文開頭、不可含 `-`；AI 不可自行編造，未知時須先詢問使用者（可依 git user 建議，但須經確認）
