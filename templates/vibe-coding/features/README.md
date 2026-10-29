@@ -36,7 +36,7 @@
 ## 範例
 
 ```md
-# FEAT-001 範例 Feature
+# FEAT-20260505-alice 範例 Feature
 
 ## 狀態
 
@@ -100,6 +100,7 @@
 
 ### 建議流程
 
+- `feature_id` 格式為 `FEAT-<YYYYMMDD>-<人員代號>`，同一人同日第二個起加 `-2`、`-3`；不可使用流水號
 - 先在 `index.md` 建立或更新 feature entry
 - 若使用者確認保留完整討論，再建立 `vibe-coding/features/<feature-id>.md`
 - 若使用者只需要短記錄，留在 `index.md` 的 Brief Notes 區塊

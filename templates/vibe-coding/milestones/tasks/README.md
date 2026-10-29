@@ -10,7 +10,15 @@
 
 - tasks file 放在 `vibe-coding/milestones/tasks/`
 - 檔名格式為 `<milestone-id>.md`
-- 範例：`vibe-coding/milestones/tasks/M001.md`
+- 範例：`vibe-coding/milestones/tasks/M-20260505-alice.md`
+
+## ID 規則
+
+- milestone ID：`M-<YYYYMMDD>-<人員代號>`，同一人同日第二個起加 `-2`、`-3`
+- task ID：`T<nnn>-<人員代號>`，在此 tasks file 內依人員各自遞增，例如 `T001-alice`、`T001-bob`
+- task ID 只在此 tasks file 內唯一；`dependency_task_ids` 指向同檔 task 時可直接寫 task ID
+- 從其他檔案引用 task（例如 `index.md` 的 `manual_pending_task_refs`）必須寫成 `<milestone-id>/<task-id>`
+- 舊有流水號（如 `M001`、`T001`）保持有效，新項目一律使用新格式
 
 ## Task 狀態
 
@@ -37,11 +45,11 @@
 ## 範例
 
 ```md
-# M001 Tasks
+# M-20260505-alice Tasks
 
 ## Milestone
 
-- milestone_id: M001
+- milestone_id: M-20260505-alice
 - title: 範例 milestone
 - status: planned
 - started_at: -
@@ -61,7 +69,8 @@
 
 | task_id | status | title | dependency_task_ids | blocker_summary | manual_pending | started_at | completed_at | actual_duration | elapsed_calendar_duration | completion_evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | ---: | --- |
-| T001 | todo | 範例 task | - | - | false | - | - | 00h:00m | 0.00 | - |
+| T001-alice | todo | 範例 task | - | - | false | - | - | 00h:00m | 0.00 | - |
+| T001-bob | todo | 另一位成員新增的 task | T001-alice | - | false | - | - | 00h:00m | 0.00 | - |
 ```
 
 ## 空白模板
@@ -91,7 +100,7 @@
 
 | task_id | status | title | dependency_task_ids | blocker_summary | manual_pending | started_at | completed_at | actual_duration | elapsed_calendar_duration | completion_evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | ---: | --- |
-| T001 | todo |  | - | - | false | - | - | 00h:00m | 0.00 | - |
+| T001-<人員代號> | todo |  | - | - | false | - | - | 00h:00m | 0.00 | - |
 ```
 
 ## 正式資料
@@ -106,5 +115,5 @@
 ## 同步規則
 
 - `index.md` 中的 `task_status_summary` 必須由 tasks file 統計而來
-- `index.md` 中的 `manual_pending_task_refs` 必須指向 tasks file 中存在的 task
+- `index.md` 中的 `manual_pending_task_refs` 必須以 `<milestone-id>/<task-id>` 指向 tasks file 中存在的 task
 - milestone 標記為 `completed` 前，必須確認必要 tasks 都是 `done` 或 `skipped`

@@ -8,10 +8,11 @@
 - 後續的 vibe coding、handoff、規格整理，都以此專案為主
 - `vibe-coding/vibe-starter` 是初始化與輔助工具目錄，不是產品原始碼主體
 - 進行實質修改前，應先閱讀此專案的 `AGENTS.md`、相關 `handoff/` 與其他必要上下文檔案
-- 若 `AGENTS.md` 已明確定義 spec 或 handoff 路徑，應優先依該明確定義執行
-- 若 `AGENTS.md` 未明確定義 spec 或 handoff 路徑，應先從專案內的 `vibe-coding/` 尋找相關目錄
+- 若 `AGENTS.md` 已明確定義 spec 路徑，應優先依該明確定義執行
+- 若 `AGENTS.md` 未明確定義 spec 路徑，應先從專案內的 `vibe-coding/` 尋找相關目錄
 - 若找不到 `vibe-coding/`，可再搜尋其他 vibe-coding 相關目錄；若仍找不到，才建立新的 `vibe-coding/`
-- 若實際使用了 fallback 找到的路徑，應主動建議更新 `AGENTS.md`，把 spec 與 handoff 路徑寫明
+- 若實際使用了 fallback 找到的路徑，應主動建議更新 `AGENTS.md`，把 spec 路徑寫明
+- handoff 目錄固定為 `vibe-coding/handoff/`，不可另行指定或改用其他路徑
 - 預設 milestone 總表路徑為 `vibe-coding/milestones/index.md`
 - 預設 milestone tasks 目錄為 `vibe-coding/milestones/tasks/`
 - 預設 feature 討論目錄為 `vibe-coding/features/`
@@ -98,11 +99,25 @@
 - 每段工作階段完成後，若已完成或暫停 1 個以上 milestone 或 task，應先進行 Consolidated Recording Review，再詢問使用者是否要整理 handoff
 - Consolidated Recording Review 一次性檢視本次是否產生需要記錄的 debt、implementation notes、decision、handoff 未解項；沒有候選項的層應明示「無」，不可建立空 placeholder 條目
 - Consolidated Recording Review 的候選項應一次列出供使用者逐項 accept / edit / skip，不可分層多次詢問
-- 使用者第一次要求 `記錄進度`、`記錄交接進度` 或等價要求時，應先解析 handoff 位置；若 `AGENTS.md` 沒有明確定義，先找 `vibe-coding/handoff/`，不可先自行發明其他資料夾
+- handoff 一律寫入 `vibe-coding/handoff/`；目錄不存在時直接建立，不可搜尋或改用其他資料夾
+- handoff 檔名格式為 `<YYYYMMDD>-<人員代號>[-<n>]-<topic>.md`，例如 `20261029-alice-auth-flow.md`
 - 若使用者同意記錄 handoff，應整理完成內容、目前狀態、下一步與風險後寫入 handoff
 - `handoff` 記錄完成後，若仍有未完成的 `tasks in milestone`，再詢問使用者要繼續或停止
 - 使用者的繼續或停止，是 `handoff` 之後的下一步決策，不是記錄 `handoff` 的前提
 - 若沒有作用中的 `milestone`，或 `tasks in milestone` 已全部完成，則不強制詢問是否繼續；若有合理下一步，可提供建議，但仍保留停止選項
+
+## ID 規則
+
+- 為避免多人多工衝突，新建 ID 不可使用全專案流水號
+- milestone、feature、layout、decision、report 項目、spec 元素的 ID 格式為 `<PREFIX>-<YYYYMMDD>-<人員代號>`；同一人同日同類第二個起加 `-2`、`-3`
+  - 例：`M-20261029-alice`、`M-20261029-alice-2`、`FEAT-20261029-bob`
+- prefix：milestone `M`、feature `FEAT`、feature 短記錄 `NOTE`、技術債 `DEBT`、layout `LAYOUT`、技術決策 `DEC`、report 觀察項目 `ITEM`、report 決策 `PDEC`、驗證 `VAL`、活動 `ACT`、工作階段 `SES`、spec 元素 `ROLE` / `OBJ` / `BEH` / `FLOW` / `RULE`
+- task ID 格式為 `T<nnn>-<人員代號>`，`<nnn>` 為三位數，在所屬 milestone 內依人員各自遞增，例如 `T001-alice`
+- task ID 只在所屬 tasks file 內唯一；從其他檔案引用時必須寫成 `<milestone-id>/<task-id>`，例如 `M-20261029-alice/T001-bob`
+- 人員代號只能用小寫英文與數字、以英文開頭、不可含 `-`；AI 不可自行編造，未知時須先詢問使用者（可依 git user 建議，但須經確認）
+- ID 建立後不可修改或重新編號；工作順序以 `work_order` 等欄位表達，不靠 ID
+- 舊有流水號 ID（如 `M001`、`T001`、`FEAT-001`）保持有效，不需改名；新項目一律使用新格式
+- prototype ID 維持語意命名 `<scope>-<variant>-v<n>`，不適用上述格式
 
 ## Feature 討論
 

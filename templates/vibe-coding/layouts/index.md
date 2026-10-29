@@ -14,6 +14,8 @@
 - 已確認的 layout 應記錄為 `defined` 或 `active`
 - implementation task 影響畫面時，應引用相關 active layout
 - 若實作結果不符合畫面期待，應修訂 layout，而不是只在 task 裡留下零散描述
+- `layout_id` 格式為 `LAYOUT-<YYYYMMDD>-<人員代號>`，同一人同日第二個起加 `-2`、`-3`；不可使用流水號
+- `related_tasks` 須使用 `<milestone-id>/<task-id>` 格式
 
 ## Layouts
 
@@ -36,14 +38,14 @@
 
 | layout_id | status | type | title | scope | layout_file | ui_contract_refs | related_features | related_milestones | related_tasks | updated_at |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| LAYOUT-001 | active | overall | 後台整體版型 | 全站後台 | vibe-coding/layouts/LAYOUT-001.md | vibe-coding/ui/design-system.md | - | - | - | 2026-05-10 |
-| LAYOUT-002 | defined | list | 後台列表頁 | 資料管理列表 | vibe-coding/layouts/LAYOUT-002.md | vibe-coding/ui/design-system.md | FEAT-001 | MS-001 | TASK-001 | 2026-05-10 |
+| LAYOUT-20260510-alice | active | overall | 後台整體版型 | 全站後台 | vibe-coding/layouts/layout-20260510-alice.md | vibe-coding/ui/design-system.md | - | - | - | 2026-05-10 |
+| LAYOUT-20260510-alice-2 | defined | list | 後台列表頁 | 資料管理列表 | vibe-coding/layouts/layout-20260510-alice-2.md | vibe-coding/ui/design-system.md | FEAT-20260505-alice | M-20260505-alice | M-20260505-alice/T001-alice | 2026-05-10 |
 
 ### UI/UX Assistance Decisions
 
 | decision_scope | selected_mode | designer_required | reason | related_layout_refs | updated_at |
 | --- | --- | --- | --- | --- | --- |
-| admin screens | designer_requested | yes | 需要先由設計師提出互動與資訊架構建議 | LAYOUT-001 | 2026-05-10 |
+| admin screens | designer_requested | yes | 需要先由設計師提出互動與資訊架構建議 | LAYOUT-20260510-alice | 2026-05-10 |
 
 ## 空白模板
 

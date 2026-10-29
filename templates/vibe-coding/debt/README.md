@@ -38,7 +38,7 @@
 
 每一筆 entry 至少要包含：
 
-- `debt_id`（DEBT-001 起遞增、不重用）
+- `debt_id`：`DEBT-<YYYYMMDD>-<人員代號>`，同一人同日第二筆起加 `-2`、`-3`；不可使用流水號、不重用（規則見 `AGENTS.md` 的 ID 規則）
 - `debt_type`：`shortcut` / `workaround` / `deferred_refactor` / `missing_test` / `hardcoded_value` / `dependency_pin` / `duplicate_logic` / `scaling_limit` / `compliance_gap` / `other`
 - 對應 spec 引用（檔案路徑、OBJ-xxx、BEH-xxx、RULE-xxx、layout id、decision id、milestone id 等）
 - `reason_left`：為什麼當下選擇留下

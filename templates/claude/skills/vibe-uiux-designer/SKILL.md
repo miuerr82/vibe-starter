@@ -280,11 +280,12 @@ description: 在 vibe-coding 工作流中扮演 UI/UX Designer 角色，協助�
 
 **Layout**：layout 的「識別碼」與「檔名」是兩件事，要分開看：
 
-- `layout_id`（寫在檔案內容、index 表格、ui_contract_refs 中）：建議格式 `LAYOUT-001`、`LAYOUT-002`...，大寫加 hyphen
+- `layout_id`（寫在檔案內容、index 表格、ui_contract_refs 中）：格式 `LAYOUT-<YYYYMMDD>-<人員代號>`，同一人同日第二個起加 `-2`、`-3`，例如 `LAYOUT-20260510-alice`、`LAYOUT-20260510-alice-2`；不可使用流水號
+- 人員代號只能用小寫英文與數字、不可含 `-`；不知道時先詢問使用者，不可自行編造
 - 對應檔名（檔案系統上）：採 kebab-case，例如：
-  - 一般 layout：`layout-001.md`、`layout-002.md`
+  - 一般 layout：`layout-20260510-alice.md`（即 `layout_id` 轉小寫）
   - 有明確 scope 時可用語意化命名：`<scope>-layout.md`，例如 `dashboard-layout.md`、`member-detail-layout.md`
-  - 不論用哪種檔名，檔案內的 `layout_id` 欄位都應保持 `LAYOUT-xxx` 格式以便交叉引用
+  - 不論用哪種檔名，檔案內的 `layout_id` 欄位都應保持 `LAYOUT-<YYYYMMDD>-<人員代號>` 格式以便交叉引用
 **Prototype**：
 
 - `prototype-id`（識別碼，也作為資料夾名）：建議格式 `<scope>-<variant>-v<n>`，例如 `dashboard-layout-v1`、`member-form-compact-v2`
@@ -361,7 +362,7 @@ exploring → comparing → accepted → implemented
 4. 詢問：是否需要參考？是否有 dashboard 的具體任務？
 5. 提出 dashboard 結構建議（卡片 grid / 區塊式 / split-pane 等）
 6. 詢問是否要立刻產 prototype（A/B/C 模式）
-7. 收斂後寫入 `layouts/layout-xxx.md`（內含 `layout_id: LAYOUT-xxx`），更新 `layouts/index.md`
+7. 收斂後寫入 `layouts/layout-<YYYYMMDD>-<人員代號>.md`（內含 `layout_id: LAYOUT-<YYYYMMDD>-<人員代號>`），更新 `layouts/index.md`
 ### 場景 B：使用者說「dD快送 的會員頁要重新設計」
 
 1. 先檢查是否已有相關 layout（搜尋 `layouts/index.md`）

@@ -420,7 +420,7 @@ bash ./vibe-coding/vibe-starter/scripts/sync
 
 1. 先讀上下文
    - 先閱讀專案根目錄 `AGENTS.md`
-   - 若 `AGENTS.md` 已明確寫出 spec 或 handoff 路徑，優先使用該路徑
+   - 若 `AGENTS.md` 已明確寫出 spec 路徑，優先使用該路徑；handoff 目錄固定為 `vibe-coding/handoff/`，不可另行指定
    - 若 `AGENTS.md` 沒有明確寫出路徑，先從 `vibe-coding/` 找起
    - 若沒有 `vibe-coding/`，再搜尋其他 vibe-coding 相關目錄；若仍找不到，才建立新的 `vibe-coding/`
    - 若本次是靠 fallback 才找到有效路徑，應建議補寫回 `AGENTS.md`
@@ -432,6 +432,7 @@ bash ./vibe-coding/vibe-starter/scripts/sync
    - 再把每個 `milestone` 拆成 `tasks in milestone`
    - milestone 總表放在 `vibe-coding/milestones/index.md`
    - milestone tasks 詳細內容放在 `vibe-coding/milestones/tasks/<milestone-id>.md`
+   - 新建 ID 採「日期＋人員代號」避免多人衝突，例如 `M-20261029-alice`、task `T001-alice`；完整規則見 `AGENTS.md` 的 ID 規則
    - 總表依 `work_order` 提供工作順序，`priority` 只作為選填的重要性提示
    - 總表中的 `manual_pending_task_refs` 只記錄使用者手動 pending 的商業決策項，不由 AI 自動推導
    - `actual_duration` 使用 `00h:00m`，`elapsed_calendar_duration` 以天為單位並保留小數點兩位
@@ -447,7 +448,7 @@ bash ./vibe-coding/vibe-starter/scripts/sync
    - 每段工作階段完成後，若已完成或暫停 1 個以上 milestone 或 task，先做 Consolidated Recording Review：一次性檢視本次是否產生需要記錄的 debt、implementation notes、decision、handoff 未解項
    - 沒有候選項的層應明示「無」，不可建立空 placeholder 條目
    - 候選項應一次列出供使用者逐項 accept / edit / skip，不可分層多次詢問
-   - 使用者第一次要求 `記錄進度` 或 `記錄交接進度` 時，先解析 handoff 位置；若 `AGENTS.md` 沒有明確定義，先找 `vibe-coding/handoff/`
+   - handoff 一律寫入 `vibe-coding/handoff/`，檔名為 `<YYYYMMDD>-<人員代號>[-<n>]-<topic>.md`
    - `handoff` 應記錄本次完成內容、目前狀態、下一步建議或待處理項目，並包含 `open_debt_summary` 與 `scheduled_debt_summary` 摘錄
 
 5. feature 討論先放在獨立區域
