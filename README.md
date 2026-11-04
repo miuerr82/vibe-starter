@@ -420,10 +420,7 @@ bash ./vibe-coding/vibe-starter/scripts/sync
 
 1. 先讀上下文
    - 先閱讀專案根目錄 `AGENTS.md`
-   - 若 `AGENTS.md` 已明確寫出 spec 路徑，優先使用該路徑；handoff 目錄固定為 `vibe-coding/handoff/`，不可另行指定
-   - 若 `AGENTS.md` 沒有明確寫出路徑，先從 `vibe-coding/` 找起
-   - 若沒有 `vibe-coding/`，再搜尋其他 vibe-coding 相關目錄；若仍找不到，才建立新的 `vibe-coding/`
-   - 若本次是靠 fallback 才找到有效路徑，應建議補寫回 `AGENTS.md`
+   - 工作區路徑固定在 `vibe-coding/` 之下（specs、milestones、features、handoff、notes、debt、layouts、ui、prototypes、reports），不可另行指定
    - 再讀 `vibe-coding/handoff/` 下最近的交接內容
    - 若已有 spec，先看與當前工作相關的文件
 
@@ -435,7 +432,7 @@ bash ./vibe-coding/vibe-starter/scripts/sync
    - 新建 ID 採「日期＋人員代號」避免多人衝突，例如 `M-20261029-alice`、task `T001-alice`；完整規則見 `AGENTS.md` 的 ID 規則
    - 總表依 `work_order` 提供工作順序，`priority` 只作為選填的重要性提示
    - 總表中的 `manual_pending_task_refs` 只記錄使用者手動 pending 的商業決策項，不由 AI 自動推導
-   - `actual_duration` 使用 `00h:00m`，`elapsed_calendar_duration` 以天為單位並保留小數點兩位
+   - `started_at`、`completed_at` 用系統指令取得狀態變更當下的時間，不記錄工時或期間
    - 一次只處理一個 task
 
 3. 先判斷是否需要補 spec
@@ -444,12 +441,12 @@ bash ./vibe-coding/vibe-starter/scripts/sync
    - 若 spec、文件、實作不一致，先指出並補齊
    - spec 明確後再進入實作
 
-4. 工作階段完成後做 Consolidated Recording Review，再決定是否記錄 `handoff`
-   - 每段工作階段完成後，若已完成或暫停 1 個以上 milestone 或 task，先做 Consolidated Recording Review：一次性檢視本次是否產生需要記錄的 debt、implementation notes、decision、handoff 未解項
-   - 沒有候選項的層應明示「無」，不可建立空 placeholder 條目
-   - 候選項應一次列出供使用者逐項 accept / edit / skip，不可分層多次詢問
-   - handoff 一律寫入 `vibe-coding/handoff/`，檔名為 `<YYYYMMDD>-<人員代號>[-<n>]-<topic>.md`
-   - `handoff` 應記錄本次完成內容、目前狀態、下一步建議或待處理項目，並包含 `open_debt_summary` 與 `scheduled_debt_summary` 摘錄
+4. 工作收尾依固定順序：合併記錄複查 → handoff → commit → push
+   - 合併記錄複查：milestone / task 狀態與時間、debt 引用欄位、implementation notes 由 AI 直接寫入；新的 debt、debt waive、技術決策、spec 回寫才需要使用者決定，一次列出逐項 accept / edit / skip，沒有就不提問
+   - handoff：仍有未完成的 milestone / task 時 AI 直接寫，不詢問；全部完成則不寫，除非使用者要求
+   - handoff 一律寫入 `vibe-coding/handoff/`，檔名為 `<YYYYMMDD>-<人員代號>[-<n>]-<topic>.md`，並包含 `open_debt_summary` 與 `scheduled_debt_summary`
+   - commit / push 只在使用者要求或專案規則授權時執行；紀錄與 handoff 要和本次工作放在同一個 commit
+   - 不建立空白或佔位條目
 
 5. feature 討論先放在獨立區域
    - feature 討論未轉成正式 spec 前，先放在 `vibe-coding/features/`
@@ -472,7 +469,7 @@ bash ./vibe-coding/vibe-starter/scripts/sync
    - 若使用者不清楚 layout 方向，可先提供 1 到 3 個參考網站、URL、截圖或 UI 範例，由 AI 轉成專案自己的 layout 規則
 
 7. 再決定是否繼續
-   - 若目前 `milestone` 還有未完成 task，`handoff` 記錄完成後，再由使用者決定要繼續或停止
+   - 若目前 `milestone` 還有未完成 task，收尾完成後，再由使用者決定要繼續或停止
    - 若沒有作用中的 `milestone`，或 task 已全部完成，則不必強制詢問是否繼續
    - 這種情況下若有合理下一步，可以提供建議，但仍保留停止選項
 
@@ -571,8 +568,7 @@ Milestone layer 用來記錄已決定要執行的工作，不用來收納所有�
 - `blocked` 表示目前想做但被依賴或阻塞卡住
 - `manual_pending_task_refs` 只記錄使用者手動 pending 的商業決策項，不由 AI 自動推導
 - `task_status_summary` 應由對應 tasks file 摘要而來，不取代 tasks file
-- `actual_duration` 記錄實際工作時間，格式為 `00h:00m`
-- `elapsed_calendar_duration` 記錄跨日經過時間，以天為單位並保留小數點兩位
+- `started_at`、`completed_at` 用系統指令取得狀態變更當下的時間，格式 `YYYY-MM-DDTHH:MM±HHMM`；不記錄工時或期間
 
 建議流程：
 
@@ -586,7 +582,7 @@ Milestone layer 用來記錄已決定要執行的工作，不用來收納所有�
 
 Feature discussion layer 用來保存還沒正式進入 spec 或 milestone 的想法、討論與決策脈絡。
 
-- feature 討論預設放在 `vibe-coding/features/`
+- feature 討論放在 `vibe-coding/features/`
 - feature index 放在 `vibe-coding/features/index.md`
 - 單一 feature 討論可放在 `vibe-coding/features/<feature-id>.md`
 - feature 不可未經使用者確認就轉成正式 spec
@@ -596,6 +592,7 @@ Feature discussion layer 用來保存還沒正式進入 spec 或 milestone 的�
 常見狀態：
 
 - `confirmed`: 已確認為未來優先方向
+- `proposed`: 剛提出，尚未開始整理
 - `discussing`: 正在討論
 - `brief_note`: 只保留短記錄
 - `preserved`: 保留完整討論但尚未執行
@@ -680,7 +677,7 @@ layout 類型可包含：
 
 ### 工作方式
 
-- prototype 預設放在 `vibe-coding/prototypes/`
+- prototype 放在 `vibe-coding/prototypes/`
 - registry 放在 `vibe-coding/prototypes/registry.yml`
 - 單一 prototype 應至少包含 `prototype.yml`、`README.md`、`decisions.md`、`notes.md`
 - accepted prototype 應搭配 `design-system.md` 與相關 layout 一起作為實作依據
@@ -782,8 +779,9 @@ bash ./vibe-coding/vibe-starter/scripts/install-skill
 
 - `spec-driven-consultant`
 - `vibe-uiux-designer`
-- `vibe-project-manager`
-- `vibe-recording-keeper`（收尾時的合併記錄複查：debt / notes / decisions / handoff）
+- `vibe-project-manager`（執行管理與工作收尾：合併記錄複查、handoff、commit / push 順序）
+
+> 移轉說明：`vibe-recording-keeper` 已併入 `vibe-project-manager`，starter 不再提供。`sync` 不會動 `.claude/skills/`，若專案先前安裝過，請手動刪除 `.claude/skills/vibe-recording-keeper/`，並重新安裝 `vibe-project-manager`（`install-skill pm`，選擇覆寫），避免兩個 skill 同時處理收尾。
 
 安裝位置：
 

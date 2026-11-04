@@ -11,21 +11,18 @@ SKILL_KEYS=(
   "spec-driven-consultant"
   "vibe-uiux-designer"
   "vibe-project-manager"
-  "vibe-recording-keeper"
 )
 
 ALIASES=(
   "spec"
   "uiux"
   "pm"
-  "rec"
 )
 
 MENU_LABELS=(
   "Spec-driven 需求顧問"
   "UI/UX Designer"
   "Project Manager"
-  "Recording Keeper（記錄複查）"
 )
 
 declare -a INSTALL_SUMMARY=()
@@ -44,7 +41,6 @@ canonical_skill() {
     1|spec-driven-consultant|spec) print_line "spec-driven-consultant" ;;
     2|vibe-uiux-designer|uiux) print_line "vibe-uiux-designer" ;;
     3|vibe-project-manager|pm) print_line "vibe-project-manager" ;;
-    4|vibe-recording-keeper|rec|recording) print_line "vibe-recording-keeper" ;;
     *) return 1 ;;
   esac
 }
@@ -223,7 +219,9 @@ main() {
   ensure_dir "${CLAUDE_DIR}"
   ensure_dir "${CLAUDE_SKILLS_DIR}"
 
-  mapfile -t selected_targets < <(collect_targets "${mode}" "$@")
+  local targets_output=""
+  targets_output="$(collect_targets "${mode}" "$@")" || exit 1
+  mapfile -t selected_targets <<< "${targets_output}"
 
   for selected in "${selected_targets[@]}"; do
     [[ -n "${selected}" ]] || continue

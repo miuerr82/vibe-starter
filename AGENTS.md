@@ -17,6 +17,11 @@ Before making substantive changes to starter behavior, read the relevant source-
 * related files under `templates/`
 * related launchers under `scripts/`
 
+`../` refers to the parent spec repository that mounts `vibe-starter` as a git submodule; the root spec lives there, not in this repository.
+
+* If the parent directory of this repository is named `vibe-coding`, this is an installed copy inside a product project (`<project-root>/vibe-coding/vibe-starter/`): `../specs/` is that product's spec, not the starter's. Do not edit the installed copy; starter changes must be made in the upstream starter repository.
+* If `../AGENTS.md` or `../specs/` is absent (for example, a standalone clone), do not change starter behavior: limit work to technical-only changes and ask the user for the root spec before any behavior-affecting change.
+
 ---
 
 # 🎯 Global Principles
@@ -51,6 +56,7 @@ Before making substantive changes to starter behavior, read the relevant source-
 * Keep product-project artifacts inside the product project; only change `vibe-starter` when adjusting reusable starter capability
 * For existing projects, first judge whether the change is a technical-only small change or a behavior-affecting change; only the latter requires minimum necessary spec before implementation
 * If the user does not know how to start, first offer structured starting options before deciding whether project-file inspection is needed
+* At session close, follow the root Session Close Rules order: recording review, handoff, commit, push; the handoff record goes into the same commit as the work, never as a separate commit after push
 
 ---
 
@@ -97,7 +103,7 @@ When implementing features:
 
 # 🚫 Constraints
 
-* No code without spec
+* No behavior-affecting change without spec (the root Spec-First Gate Rules are the single definition; technical-only changes follow Workflow step 5)
 * No undefined objects
 * No implicit behavior
 * Do not bypass spec structure

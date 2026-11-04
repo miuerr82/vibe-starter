@@ -28,13 +28,11 @@
 - `done`: 已完成
 - `skipped`: 明確略過，不納入必要完成條件
 
-## 時間與工時
+## 時間
 
 - `started_at`: task 進入 `in_progress` 時記錄
 - `completed_at`: task 進入 `done` 時記錄
-- `actual_duration`: 實際投入工時，格式為 `00h:00m`
-- `elapsed_calendar_duration`: 頭尾時間跨度，以天為單位並保留小數點兩位
-- `actual_duration` 不可由 `started_at` 和 `completed_at` 直接猜測
+- `started_at`、`completed_at` 記錄狀態變更當下的時間，一律用系統指令取得（如 `date '+%Y-%m-%dT%H:%M%z'`、PowerShell `Get-Date -Format 'yyyy-MM-ddTHH:mmzzz'`），格式 `YYYY-MM-DDTHH:MM±HHMM`，不可推估或補填；不記錄工時或期間
 
 ## Manual Pending
 
@@ -54,8 +52,6 @@
 - status: planned
 - started_at: -
 - completed_at: -
-- actual_duration: 00h:00m
-- elapsed_calendar_duration: 0.00
 
 ## Task Summary
 
@@ -67,10 +63,10 @@
 
 ## Tasks
 
-| task_id | status | title | dependency_task_ids | blocker_summary | manual_pending | started_at | completed_at | actual_duration | elapsed_calendar_duration | completion_evidence |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | ---: | --- |
-| T001-alice | todo | 範例 task | - | - | false | - | - | 00h:00m | 0.00 | - |
-| T001-bob | todo | 另一位成員新增的 task | T001-alice | - | false | - | - | 00h:00m | 0.00 | - |
+| task_id | status | title | dependency_task_ids | blocker_summary | manual_pending | started_at | completed_at | completion_evidence | incurred_debt_ref | paying_back_debt_ref |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| T001-alice | todo | 範例 task | - | - | false | - | - | - | - | - |
+| T001-bob | todo | 另一位成員新增的 task | T001-alice | - | false | - | - | - | - | - |
 ```
 
 ## 空白模板
@@ -85,8 +81,6 @@
 - status:
 - started_at:
 - completed_at:
-- actual_duration: 00h:00m
-- elapsed_calendar_duration: 0.00
 
 ## Task Summary
 
@@ -98,9 +92,9 @@
 
 ## Tasks
 
-| task_id | status | title | dependency_task_ids | blocker_summary | manual_pending | started_at | completed_at | actual_duration | elapsed_calendar_duration | completion_evidence |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | ---: | --- |
-| T001-<人員代號> | todo |  | - | - | false | - | - | 00h:00m | 0.00 | - |
+| task_id | status | title | dependency_task_ids | blocker_summary | manual_pending | started_at | completed_at | completion_evidence | incurred_debt_ref | paying_back_debt_ref |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| T001-<人員代號> | todo |  | - | - | false | - | - | - | - | - |
 ```
 
 ## 正式資料
