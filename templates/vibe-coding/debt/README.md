@@ -62,6 +62,8 @@
 
 - 實作中遇到 spec 詮釋問題：見 `vibe-coding/notes/implementation-notes.md`
 - 架構或選型決策：見 `vibe-coding/specs/decisions.md` 與 `vibe-coding/specs/`
-- 任何 milestone / task 若為了「還某筆 debt」而存在，應在該 milestone 或 task 的 `paying_back_debt_ref` 引用本檔案的對應 debt_id
-- 任何 milestone / task 若產生新的 debt，應在 `incurred_debt_refs` 引用對應 debt_id
+- 任何 milestone / task 若為了「還某筆 debt」而存在，應引用本檔案的對應 debt_id（milestone 用 `paying_back_debt_refs`，task 用 `paying_back_debt_ref`）
+- 任何 milestone / task 若產生新的 debt，應引用對應 debt_id（milestone 用 `incurred_debt_refs`，task 用 `incurred_debt_ref`）
+- 任何技術決策或專案決策若知情接受未來代價，應在該決策的 `incurred_debt_refs` 引用對應 debt_id，不可只把代價寫在決策的 `consequences` 或 `result` 欄位
+- 提案 refactor、最佳化或範圍擴張前，應先查本檔案，避免忽略已知 debt
 - 交接時，handoff 應在 `open_debt_summary` 與 `scheduled_debt_summary` 中摘錄本檔案的目前狀態

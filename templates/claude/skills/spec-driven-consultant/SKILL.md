@@ -238,8 +238,11 @@ Acceptance 不是被寫出來的，而是從 Spec 推導出來的。
 - 不主動產出 `vibe-coding/specs/` 的檔案內容
 - 即使對話中出現了清楚的角色 / 物件 / 行為，也只在對話中口頭引用，不寫成 spec patch
 **階段 2｜整理階段（顯式觸發）**
-- 觸發訊號：使用者明確說「整理一下」「給我 spec」「寫進 vibe-coding」「整理成 patch」等
-- 不能由顧問自行判斷時機切入，**必須由使用者主動觸發**
+- 觸發訊號（任一即可）：
+  - 使用者明確說「整理一下」「給我 spec」「寫進 vibe-coding」「整理成 patch」等
+  - 使用者明確要求**實作**某個會影響行為的功能（例如「幫我開發」「開始做」）：這本身就授權起草最小必要的 spec patch，不需要再請使用者說一次「整理成 spec」
+- 除上述兩種訊號外，不能由顧問自行判斷時機切入；純討論（釐清、評估、比較）停留在階段 1
+- 由實作授權觸發時，只整理實作所需的最小範圍；尚未確定的業務決策列為待決項請使用者決定；草稿確認前，只可先實作不牽涉待決項的部分
 - 切入後依下方「vibe-starter 輸出格式」分檔輸出，只輸出正式資料
 - 資訊未釐清處標註 `<!-- 待補 -->`，不要憑空補完
 - 輸出後仍視為草稿，狀態為 draft / proposed，不可標記為 accepted / active
@@ -261,86 +264,91 @@ Acceptance 不是被寫出來的，而是從 Spec 推導出來的。
 
 - 不使用流水號，避免多人或多個 branch 平行整理 spec 時撞號
 - 同一人同日同類第二個起加 `-2`、`-3`，例如 `BEH-20260505-alice-2`
-- 人員代號只能用小寫英文與數字、不可含 `-`；不知道時先詢問使用者，不可自行編造
+- 人員代號只能用小寫英文與數字、以英文開頭、不可含 `-`；不知道時先詢問使用者（可依 git user 建議，但須確認），不可自行編造
 - ID 建立後不可修改或重新編號；既有流水號 ID（如 `ROLE-001`）保持有效
 - 中文名稱僅作顯示用，引用時一律用 ID
 ### 分檔輸出模板
 
+> 以下格式與 `generate` 產生的 `vibe-coding/specs/*.md` 模板一致，可直接貼進各檔的「正式資料」區。
+
 #### roles.md
 
 ```md
-## ROLE-20260505-alice 收銀員
-- Description: POS 端執行結帳動作的人
-- Scope: 單店、單班次
-- 相關行為: BEH-20260505-alice, BEH-20260505-alice-2
+### ROLE-20260505-alice 收銀員
+
+- 定義：POS 端執行結帳動作的人（單店、單班次）
+- 相關行為：BEH-20260505-alice、BEH-20260505-alice-2
 ```
 
 #### objects.md
 
 ```md
-## OBJ-20260505-alice 訂單
-- Definition: 一筆消費的完整紀錄
-- Attributes:
+### OBJ-20260505-alice 訂單
+
+- 定義：一筆消費的完整紀錄
+- 屬性：
   - 訂單編號
   - 總金額
   - 建立時間
-- States: 見 states.md OBJ-20260505-alice
-- 相關行為: BEH-20260505-alice（建立）, BEH-20260505-alice-3（取消）
+- 狀態：見 `states.md` 的 OBJ-20260505-alice
+- 相關行為：BEH-20260505-alice（建立）、BEH-20260505-alice-3（取消）
 ```
 
 #### states.md
 
 ```md
-## OBJ-20260505-alice 訂單
-- States:
+### OBJ-20260505-alice 訂單
+
+- 狀態：
   - draft（草稿）
   - checking_out（結帳中）
   - completed（已完成）
   - cancelled（已取消）
-- Transitions:
-  - draft → checking_out（觸發: BEH-20260505-alice）
-  - checking_out → completed（觸發: BEH-20260505-alice-2 成功）
-  - checking_out → cancelled（觸發: BEH-20260505-alice-3）
+- 轉移：
+  - draft → checking_out（觸發：BEH-20260505-alice）
+  - checking_out → completed（觸發：BEH-20260505-alice-2 成功）
+  - checking_out → cancelled（觸發：BEH-20260505-alice-3）
 ```
 
-> State key 用 snake_case 英文，中文僅作對照；跨檔引用一律用 key（例如 `Pre-state: OBJ-20260505-alice=draft`）。
+> 狀態 key 用 snake_case 英文，中文僅作對照；跨檔引用一律用 key（例如 `前狀態：OBJ-20260505-alice=draft`）。
 
 #### behaviors.md
 
 ```md
-## BEH-20260505-alice 結帳
-- Actor: ROLE-20260505-alice
-- Target: OBJ-20260505-alice
-- Pre-state: OBJ-20260505-alice=draft
-- Post-state: OBJ-20260505-alice=checking_out
-- Result: 進入結帳流程
-- Related rules: <!-- 待補 -->
+### BEH-20260505-alice 結帳
+
+- 角色：ROLE-20260505-alice
+- 目標物件：OBJ-20260505-alice
+- 前狀態：OBJ-20260505-alice=draft
+- 後狀態：OBJ-20260505-alice=checking_out
+- 結果：進入結帳流程
+- 相關規則：<!-- 待補 -->
 ```
 
 #### flows.md
 
 ```md
-## FLOW-20260505-alice 結帳到發票上傳
-- Goal: 完成一次消費並向財政部上傳發票
-- Steps:
+### FLOW-20260505-alice 結帳到發票上傳
+
+- 目標：完成一次消費並向財政部上傳發票
+- 步驟：
   1. BEH-20260505-alice 結帳
   2. BEH-20260505-alice-2 開立發票
   3. BEH-20260505-alice-4 上傳發票到財政部
-- Related objects: OBJ-20260505-alice, OBJ-20260505-alice-2
+- 相關物件：OBJ-20260505-alice、OBJ-20260505-alice-2
 ```
 
-> Flow step **只引用 BEH-id**（可加行為標題增加可讀性），不重新定義 role / object——actor 與 target 一律以 behaviors.md 為單一來源，避免兩處不一致。
+> 流程步驟**只引用 BEH ID**（可加行為名稱增加可讀性），不重新定義角色或物件；角色與目標物件一律以 behaviors.md 為單一來源。
 
 #### rules.md
 
 ```md
-## RULE-20260505-alice 發票須於 48 小時內上傳
-- Type: 時間規則
-- Applies to: OBJ-20260505-alice-2
-- Trigger: BEH-20260505-alice-2 完成後
-- Constraint: 必須在 48 小時內執行 BEH-20260505-alice-4
-- Owner: ROLE-20260505-alice-2
-- Failure handling: <!-- 待補 -->
+### RULE-20260505-alice 發票須於 48 小時內上傳
+
+- 分類：流程限制（時間規則）
+- 適用對象：OBJ-20260505-alice-2
+- 約束：BEH-20260505-alice-2 完成後，必須在 48 小時內執行 BEH-20260505-alice-4
+- 違反時處理：<!-- 待補 -->
 ```
 
 #### boundaries.md

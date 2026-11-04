@@ -38,8 +38,8 @@
 
 | layout_id | status | type | title | scope | layout_file | ui_contract_refs | related_features | related_milestones | related_tasks | updated_at |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| LAYOUT-20260510-alice | active | overall | 後台整體版型 | 全站後台 | vibe-coding/layouts/layout-20260510-alice.md | vibe-coding/ui/design-system.md | - | - | - | 2026-05-10 |
-| LAYOUT-20260510-alice-2 | defined | list | 後台列表頁 | 資料管理列表 | vibe-coding/layouts/layout-20260510-alice-2.md | vibe-coding/ui/design-system.md | FEAT-20260505-alice | M-20260505-alice | M-20260505-alice/T001-alice | 2026-05-10 |
+| LAYOUT-20260510-alice | active | overall | 後台整體版型 | 全站後台 | vibe-coding/layouts/LAYOUT-20260510-alice.md | vibe-coding/ui/design-system.md | - | - | - | 2026-05-10 |
+| LAYOUT-20260510-alice-2 | defined | list | 後台列表頁 | 資料管理列表 | vibe-coding/layouts/LAYOUT-20260510-alice-2.md | vibe-coding/ui/design-system.md | FEAT-20260505-alice | M-20260505-alice | M-20260505-alice/T001-alice | 2026-05-10 |
 
 ### UI/UX Assistance Decisions
 

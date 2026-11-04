@@ -49,7 +49,7 @@
 
 ## 何時應該回寫 spec
 
-- `deviation` 或 `design_decision` 若已被驗證可接受，應建議把結論回寫到 `vibe-coding/specs/` 對應檔案
+- `deviation` 若已被驗證可接受，應建議把結論回寫到 `vibe-coding/specs/` 對應檔案；`design_decision` 若補足了 spec 的空白，也可一併建議回寫
 - `open_question` 在 owner 確認後，結論應回寫到 spec 或 `decisions.md`，並在 notes 中標示已 resolved 與引用位置
 - 回寫後，notes 中的對應條目保留作為歷史紀錄，不要刪除
 

@@ -8,18 +8,22 @@
 
 ## Handoff 誰負責整理
 
-- handoff 以 AI 協助整理為主
-- 使用者不需要自己手寫完整交接內容，只需要決定是否要記錄
-- AI 應協助整理目前進度、下一步與風險，並寫入 handoff 文件
+- handoff 由 AI 直接整理並寫入，使用者不需要手寫，也不需要每次決定要不要記
 
 ## Handoff 觸發時機
 
-- 完成一個明確任務後
-- 每段工作階段完成後，若已完成或暫停 1 個以上 milestone 或 task
-- 準備切換主題前
-- 準備暫停或結束目前工作前
-- 發現仍有未完成風險時
-- 準備交由下一次對話或下一位協作者接續時
+- 工作收尾（結束、暫停、切換主題、交由下一次對話或下一位協作者）時，若仍有未完成的 milestone / task（`todo`、`in_progress`、`blocked`）→ **直接寫 handoff，不詢問**
+- 本次碰到的 milestone / task 全部完成 → **不寫 handoff**，除非使用者要求
+
+## 收尾順序（固定）
+
+1. 合併記錄複查（debt、implementation notes、decisions）
+2. handoff（依上面的觸發時機）
+3. commit：本次工作、紀錄與 handoff 放在同一個 commit
+4. push
+
+- commit / push 只在使用者要求或專案規則授權時執行
+- 不可先 commit / push 再補 handoff；那只會多一次沒有意義的 commit
 
 ## Handoff 位置
 
@@ -32,14 +36,6 @@
 - `<topic>` 使用 kebab-case
 - 同一人同日第二份起加 `-2`、`-3`，例如 `20261029-alice-2-auth-flow.md`
 - 人員代號規則與 `AGENTS.md` 的 ID 規則相同
-
-## Handoff 提示方式
-
-- AI 可主動詢問：
-  - 是否要我整理目前 handoff？
-  - 這一段已完成，是否要記錄成 handoff？
-  - 目前已有可交接內容，是否要我寫入 handoff？
-  - 這段工作階段已完成，是否要我整理交接記錄？
 
 ## 範例
 
@@ -56,13 +52,13 @@
 - 還缺什麼
 - 下一步建議
 - 風險或待確認事項
+- `open_debt_summary`：仍未償還的 debt
+- `scheduled_debt_summary`：已排入 milestone / task 的 debt
 
 ### Handoff 觸發時機
 
-- 完成一個任務後
-- 完成一段工作階段後
-- 切換主題前
-- 結束工作前
+- 收尾時仍有未完成的 milestone / task → 直接寫
+- 全部完成 → 不寫，除非使用者要求
 
 ## 空白模板
 
@@ -97,13 +93,13 @@
 - 還缺什麼
 - 下一步建議
 - 風險或待確認事項
+- `open_debt_summary`：仍未償還的 debt
+- `scheduled_debt_summary`：已排入 milestone / task 的 debt
 
 ### Handoff 觸發時機
 
-- 完成一個任務後
-- 完成一段工作階段後
-- 切換主題前
-- 結束工作前
+- 收尾時仍有未完成的 milestone / task → 直接寫
+- 全部完成 → 不寫，除非使用者要求
 
 ### Handoff 位置
 
